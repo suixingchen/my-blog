@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${mode == 'create'} ? '写新文章' : '编辑文章')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main class="container narrow">
+    <div class="page-head">
+        <div>
+            <h1 th:text="${mode == 'create'} ? '写新文章' : '编辑文章'">写新文章</h1>
+            <p class="muted">正文支持换行排版，段落之间空一行即可</p>
+        </div>
+        <a class="btn" th:href="@{/admin}">返回列表</a>
+    </div>
+
+    <form class="card form-card" th:object="${article}"
+          th:action="${mode == 'create'} ? @{/admin/articles} : @{/admin/articles/{id}(id=${article.id})}"
+          method="post">
+
+        <div class="field">
+            <label for="title">标题 <span class="required">*</span></label>
+            <input type="text" id="title" th:field="*{title}" placeholder="给文章起个标题" required maxlength="150">
+        </div>
+
+        <div class="field-row">
+            <div class="field">
+                <label for="category">分类</label>
+                <input type="text" id="category" th:field="*{category}" placeholder="例如：后端" maxlength="50">
+            </div>
+            <div class="field">
+                <label for="tags">标签</label>
+                <input type="text" id="tags" th:field="*{tags}" placeholder="多个标签用英文逗号分隔" maxlength="200">
+            </div>
+            <div class="field">
+                <label for="author">作者</label>
+                <input type="text" id="author" th:field="*{author}" maxlength="50">
+            </div>
+        </div>
+
+        <div class="field">
+            <label for="summary">摘要</label>
+            <input type="text" id="summary" th:field="*{summary}" placeholder="留空则自动截取正文前 120 字" maxlength="300">
+        </div>
+
+        <div class="field">
+            <label for="content">正文 <span class="required">*</span></label>
+            <textarea id="content" th:field="*{content}" rows="16" placeholder="开始写作…" required></textarea>
+        </div>
+
+        <div class="field checkbox-field">
+            <label>
+                <input type="checkbox" th:field="*{published}">
+                立即发布（不勾选则保存为草稿，前台不可见）
+            </label>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary"
+                    th:text="${mode == 'create'} ? '发布文章' : '保存修改'">发布文章</button>
+            <a class="btn" th:href="@{/admin}">取消</a>
+        </div>
+    </form>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

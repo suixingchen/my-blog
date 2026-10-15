@@ -1,44 +1,49 @@
 <!DOCTYPE html>
 <html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title th:text="${blogTitle}">我的个人博客</title>
-    <link rel="stylesheet" th:href="@{/css/style.css}">
-</head>
+<head th:replace="~{fragments/layout :: head('首页')}"></head>
 <body>
-<header class="site-header">
-    <div class="container header-inner">
-        <a class="brand" th:href="@{/}" th:text="${blogTitle}">我的个人博客</a>
-        <nav class="nav">
-            <a th:href="@{/}">首页</a>
-        </nav>
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main class="container layout">
+    <div class="main-col">
+        <section class="hero">
+            <h1 th:text="${blogTitle}">我的个人博客</h1>
+            <p th:text="${blogSubtitle}">记录学习与生活的角落</p>
+        </section>
+
+        <section class="post-list">
+            <article class="post-card" th:each="post : ${posts}">
+                <h2 class="post-title">
+                    <a th:href="@{/article/{id}(id=${post.id})}" th:text="${post.title}">文章标题</a>
+                </h2>
+
+                <p class="meta">
+                    <span class="badge" th:if="${post.category != null}" th:text="${post.category}">分类</span>
+                    <span th:text="${#temporals.format(post.createdAt, 'yyyy-MM-dd')}">2024-05-01</span>
+                    <span>·</span>
+                    <span th:text="${post.views} + ' 次阅读'">0 次阅读</span>
+                </p>
+
+                <p class="summary" th:text="${post.displaySummary}">摘要</p>
+
+                <div class="tags" th:if="${post.tags != null and !post.tags.isBlank()}">
+                    <span class="tag" th:each="tag : ${#strings.arraySplit(post.tags, ',')}"
+                          th:text="${#strings.trim(tag)}">标签</span>
+                </div>
+
+                <a class="read-more" th:href="@{/article/{id}(id=${post.id})}">阅读全文 →</a>
+            </article>
+        </section>
+
+        <div class="card empty" th:if="${#lists.isEmpty(posts)}">
+            <p>还没有已发布的文章。</p>
+            <a class="btn btn-primary" th:href="@{/admin/articles/new}">去写第一篇</a>
+        </div>
     </div>
-</header>
 
-<main class="container">
-    <section class="hero">
-        <h1 th:text="${blogTitle}">我的个人博客</h1>
-        <p th:text="${blogSubtitle}">记录学习与生活的角落</p>
-    </section>
-
-    <section class="post-list">
-        <article class="post-card" th:each="post : ${posts}">
-            <h2 th:text="${post.title}">文章标题</h2>
-            <p class="meta">
-                <span th:text="${post.category}">分类</span>
-                ·
-                <span th:text="${post.createdAt}">2024-05-01</span>
-            </p>
-            <p th:text="${post.summary}">摘要</p>
-        </article>
-    </section>
+    <aside th:replace="~{fragments/layout :: sidebar}"></aside>
 </main>
 
-<footer class="site-footer">
-    <div class="container">
-        <p>© 2024 <span th:text="${blogAuthor}">博主</span> · Powered by Spring Boot</p>
-    </div>
-</footer>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
 </body>
 </html>

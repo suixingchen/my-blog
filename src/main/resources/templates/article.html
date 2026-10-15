@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${article.title})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main class="container layout">
+    <div class="main-col">
+        <article class="card article-detail">
+            <header class="article-head">
+                <h1 th:text="${article.title}">文章标题</h1>
+                <p class="meta">
+                    <span class="badge" th:if="${article.category != null}" th:text="${article.category}">分类</span>
+                    <span th:text="${article.author}">作者</span>
+                    <span>·</span>
+                    <span th:text="${#temporals.format(article.createdAt, 'yyyy-MM-dd HH:mm')}">发布时间</span>
+                    <span>·</span>
+                    <span th:text="${article.views} + ' 次阅读'">0 次阅读</span>
+                    <span th:if="${article.published == false}" class="draft-flag">草稿</span>
+                </p>
+                <div class="tags" th:if="${article.tags != null and !article.tags.isBlank()}">
+                    <span class="tag" th:each="tag : ${#strings.arraySplit(article.tags, ',')}"
+                          th:text="${#strings.trim(tag)}">标签</span>
+                </div>
+            </header>
+
+            <div class="article-content" th:text="${article.content}">正文</div>
+
+            <footer class="article-foot">
+                <a class="btn" th:href="@{/}">← 返回首页</a>
+                <a class="btn" th:href="@{/admin/articles/{id}/edit(id=${article.id})}">编辑这篇文章</a>
+            </footer>
+        </article>
+
+        <section class="card" th:if="${not #lists.isEmpty(related)}">
+            <h4 class="card-title">继续阅读</h4>
+            <ul class="related-list">
+                <li th:each="item : ${related}">
+                    <a th:href="@{/article/{id}(id=${item.id})}" th:text="${item.title}">相关文章</a>
+                </li>
+            </ul>
+        </section>
+    </div>
+
+    <aside th:replace="~{fragments/layout :: sidebar}"></aside>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

@@ -21,6 +21,7 @@ Thumbs.db
 *.log
 logs/
 data/
+.run-tmp/
 *.db
 *.mv.db
 *.trace.db
