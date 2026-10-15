@@ -20,8 +20,8 @@
 - **后端**：Spring Boot 3.2.5、Spring MVC、Spring Data JPA（Hibernate 6）、Jakarta Bean Validation
 - **模板**：Thymeleaf 3（`th:fragment` 片段复用）
 - **数据库**：H2（文件模式，默认，免安装） / MySQL 8（`application-mysql.yml` 切换）
-- **构建**：Maven 3.9（`spring-boot-maven-plugin`）
-- **前端**：手写 CSS（卡片式博客主题，响应式，无前端构建步骤）
+- **构建**：Maven 3.9//`spring-boot-maven-plugin`
+- **前端**：手写 CSS//卡片式博客主题，响应式，无前端构建步骤
 - **JDK**：Java 17
 - **测试**：JUnit 5 + AssertJ + `@DataJpaTest`
 
