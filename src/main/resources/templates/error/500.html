@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('服务器错误')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main class="container narrow">
+    <div class="card error-page">
+        <p class="error-code" th:text="${status} ?: 500">500</p>
+        <h1 th:text="${errorTitle} ?: '服务器内部错误'">服务器内部错误</h1>
+        <p class="muted">服务端处理请求时出错了，具体原因已记录到应用日志。</p>
+        <p class="muted" th:if="${errorMessage}" th:text="${errorMessage}">异常信息</p>
+        <div class="form-actions center-actions">
+            <a class="btn btn-primary" th:href="@{/}">回到首页</a>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

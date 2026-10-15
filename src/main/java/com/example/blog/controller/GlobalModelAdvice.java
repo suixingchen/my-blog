@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;
 
 /**
- * 给所有页面注入公共数据（站点信息、侧边栏分类）。
+ * 给所有页面注入公共数据（站点信息、侧边栏分类统计）。
  */
 @ControllerAdvice
 public class GlobalModelAdvice {
@@ -32,6 +32,6 @@ public class GlobalModelAdvice {
         model.addAttribute("blogTitle", blogTitle);
         model.addAttribute("blogSubtitle", blogSubtitle);
         model.addAttribute("blogAuthor", blogAuthor);
-        model.addAttribute("categories", articleService.listCategories());
+        model.addAttribute("categoryCounts", articleService.categoryCounts());
     }
 }

@@ -30,12 +30,18 @@
 
     <div class="card">
         <h4 class="card-title">文章分类</h4>
-        <ul class="category-list" th:if="${not #lists.isEmpty(categories)}">
-            <li th:each="category : ${categories}">
-                <span th:text="${category}">后端</span>
+        <ul class="category-list" th:if="${not #maps.isEmpty(categoryCounts)}">
+            <li>
+                <a th:href="@{/}">全部</a>
+            </li>
+            <li th:each="entry : ${categoryCounts}">
+                <a th:href="@{/(category=${entry.key})}"
+                   th:classappend="${entry.key == currentCategory} ? 'active'"
+                   th:text="${entry.key}">后端</a>
+                <span class="count" th:text="${entry.value}">0</span>
             </li>
         </ul>
-        <p class="muted" th:if="${#lists.isEmpty(categories)}">暂无分类</p>
+        <p class="muted" th:if="${#maps.isEmpty(categoryCounts)}">暂无分类</p>
     </div>
 
     <div class="card">

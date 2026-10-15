@@ -1,21 +1,198 @@
-# my-blog
+# my-blog · Spring Boot 个人博客系统
 
-基于 Spring Boot 的个人博客系统（开发中）。
+一个用 Spring Boot + Thymeleaf 搭建的个人博客：前台可以浏览文章列表与详情，后台可以发布、编辑、删除文章（按需求**暂不做登录验证**）。数据默认存放在本地 H2 文件数据库，也可切换到 MySQL。
 
-## 当前进度
+## 功能清单
 
-- [x] 项目初始化：Maven + Spring Boot 骨架、Thymeleaf 首页列表（先用假数据验证模板链路）
-- [ ] 接入数据库，实现文章发布 / 列表 / 详情
-- [ ] 后台管理页面（增删改查，无需登录）
-- [ ] 完善：分页与搜索、表单校验、全局异常处理、MySQL 配置
-- [ ] 部署到本地并通过浏览器访问
+| 模块 | 功能 |
+| --- | --- |
+| 前台首页 `/` | 已发布文章分页列表、关键字搜索（标题 / 标签）、按分类筛选、侧边栏分类统计 |
+| 文章详情 `/article/{id}` | 完整正文、阅读量自增、标签、相关文章推荐、一键跳转编辑 |
+| 后台 `/admin` | 全部文章列表（含草稿）、统计卡片、关键字搜索、分页 |
+| 后台写作 | 新建 / 编辑文章表单（标题、摘要、正文、分类、标签、作者、是否发布） |
+| 后台删除 | POST 删除并二次确认，操作结果以 Flash 消息提示 |
+| 其他 | 表单校验（`@Valid` + 错误回显）、全局异常处理（404 / 500 友好页面）、首次启动写入演示数据 |
 
-## 阶段说明
+> 说明：按需求本版本**没有登录与权限校验**，`/admin` 任何人访问即可管理文章。若将来要上线，请先接入 Spring Security。
 
-本仓库按开发阶段提交，便于回溯每一步做了什么：
+## 技术栈
 
-1. `初始化`：项目骨架与首页占位页
-2. `核心功能开发`：数据存储 + 文章发布 / 列表 / 详情 + 后台管理
-3. `完善`：分页搜索、校验与异常处理、MySQL 生产配置、README 与部署说明
+- **后端**：Spring Boot 3.2.5、Spring MVC、Spring Data JPA（Hibernate 6）、Jakarta Bean Validation
+- **模板**：Thymeleaf 3（`th:fragment` 片段复用）
+- **数据库**：H2（文件模式，默认，免安装） / MySQL 8（`application-mysql.yml` 切换）
+- **构建**：Maven 3.9（`spring-boot-maven-plugin`）
+- **前端**：手写 CSS（卡片式博客主题，响应式，无前端构建步骤）
+- **JDK**：Java 17
+- **测试**：JUnit 5 + AssertJ + `@DataJpaTest`
 
-详细的技术栈与本地运行方式会在功能完善后补充。
+## 目录结构
+
+```
+my-blog
+├── pom.xml
+├── db/schema-mysql.sql                 # MySQL 建表脚本（可选）
+├── src/main/java/com/example/blog
+│   ├── BlogApplication.java            # 启动类
+│   ├── config/DataInitializer.java     # 首次启动写入演示文章
+│   ├── controller/                     # HomeController / ArticleController / AdminController
+│   │   ├── GlobalModelAdvice.java      # 全站公共模型（站点信息、分类统计）
+│   │   └── GlobalExceptionHandler.java # 404 / 500 统一处理
+│   ├── dto/ArticleForm.java            # 表单对象 + 校验注解
+│   ├── entity/Article.java             # 文章实体
+│   ├── repository/ArticleRepository.java
+│   └── service/                        # ArticleService + ArticleNotFoundException
+├── src/main/resources
+│   ├── application.yml                 # 默认配置（H2）
+│   ├── application-mysql.yml           # MySQL 配置
+│   ├── static/css/style.css            # 博客主题样式
+│   └── templates/                      # index / article / admin/* / error/* / fragments/layout.html
+└── src/test/java/...                   # Repository 与 Service 测试
+```
+
+## 本地运行
+
+### 1. 环境要求
+
+- JDK 17 或更高（`java -version` 能看到 17+）
+- Maven 3.6+（或使用 IDE 内置的 Maven）
+
+没有现成环境也可以像本项目开发时那样用便携版：把 JDK 与 Maven 解压到任意目录，用绝对路径调用即可，无需改系统环境变量：
+
+```powershell
+# 本次开发实际使用的路径，仅作示例
+$env:JAVA_HOME = 'D:\tools\jdk-17.0.20.1+1'
+& 'D:\tools\apache-maven-3.9.16\bin\mvn.cmd' -v
+```
+
+国内网络建议在 Maven 的 `settings.xml` 里配置镜像与本地仓库位置，依赖下载会快很多：
+
+```xml
+<settings>
+  <localRepository>D:\m2\repository</localRepository>
+  <mirrors>
+    <mirror>
+      <id>aliyun-public</id>
+      <url>https://maven.aliyun.com/repository/public</url>
+      <mirrorOf>*</mirrorOf>
+    </mirror>
+  </mirrors>
+</settings>
+```
+
+### 2. 启动（默认 H2，零配置）
+
+```powershell
+cd my-blog
+mvn spring-boot:run
+```
+
+或先打包再运行：
+
+```powershell
+mvn clean package
+java -jar target/my-blog-0.0.1-SNAPSHOT.jar
+```
+
+启动后浏览器打开 **http://localhost:8080** 即可。数据库文件会自动生成在项目根目录 `data/blogdb.mv.db`，删除该目录即可重置数据；首次启动会自动写入 6 篇演示文章。
+
+H2 控制台：<http://localhost:8080/h2-console>（JDBC URL `jdbc:h2:file:./data/blogdb`，用户 `sa`，密码为空）。
+
+### 3. 切换到 MySQL
+
+```sql
+CREATE DATABASE myblog DEFAULT CHARACTER SET utf8mb4;
+```
+
+修改 `src/main/resources/application-mysql.yml` 里的账号密码，然后用 mysql profile 启动：
+
+```powershell
+mvn spring-boot:run "-Dspring-boot.run.profiles=mysql"
+# 或
+java -jar target/my-blog-0.0.1-SNAPSHOT.jar --spring.profiles.active=mysql
+```
+
+表结构由 JPA 自动创建（`ddl-auto=update`）；也可以先手工执行 `db/schema-mysql.sql` 再把 `ddl-auto` 改成 `none`。
+
+### 4. 运行测试
+
+```powershell
+mvn test
+```
+
+## 页面与路由
+
+| 路由 | 说明 |
+| --- | --- |
+| `GET /` | 首页列表，支持 `?keyword=&category=&page=` |
+| `GET /article/{id}` | 文章详情（阅读量 +1） |
+| `GET /admin` | 后台文章列表，支持 `?keyword=&page=` |
+| `GET /admin/articles/new` | 新建文章表单 |
+| `POST /admin/articles` | 保存新文章 |
+| `GET /admin/articles/{id}/edit` | 编辑文章表单 |
+| `POST /admin/articles/{id}` | 保存修改 |
+| `POST /admin/articles/{id}/delete` | 删除文章 |
+
+## 数据模型
+
+`Article`：`id`、`title`、`summary`（留空自动截取正文前 120 字）、`content`、`category`、`tags`（逗号分隔）、`author`、`views`、`published`、`createdAt`、`updatedAt`。
+
+时间戳由 `@PrePersist` / `@PreUpdate` 生命周期回调维护，业务代码不需要手写。
+
+## 开发过程与提交历史
+
+项目按阶段提交，便于回溯每一步做了什么：
+
+| 提交 | 内容 |
+| --- | --- |
+| 1. `chore: 初始化 Spring Boot 博客项目骨架` | Maven + Spring Boot 骨架、Thymeleaf 首页先用假数据跑通模板链路、`.gitignore`、README |
+| 2. `feat: 实现文章发布、列表、详情与后台管理` | 引入 JPA + H2、`Article` 实体与 Repository/Service、首页列表、详情页、后台增删改查、博客主题样式、演示数据 |
+| 3. `refactor: 完善校验、分页搜索、异常处理与 MySQL 支持` | 表单 DTO + 参数校验、Specification 动态查询与分页、全局异常处理与错误页、MySQL 配置与建表脚本、单元测试、README 完善 |
+
+## 遇到的困难与解决
+
+**1. 本机没有 JDK / Maven，且不想污染系统环境**
+下载 Temurin JDK 17 与 Maven 的 zip 包解压到 `D:\tools`，用绝对路径调用；Maven 通过自定义 `settings.xml` 指定国内镜像和本地仓库（放在数据盘），既不写系统环境变量，也不占用 C 盘空间。
+
+**2. Tomcat 启动直接失败：`Unable to create tempDir ... AccessDeniedException`**
+报错栈指向 `AbstractConfigurableWebServerFactory.createTempDir`：内嵌 Tomcat 需要在 `java.io.tmpdir` 下创建临时目录，而本机这个变量指向了一个受限目录，Java 进程没有创建权限。解决办法是启动时显式指定临时目录：
+
+```powershell
+java -Djava.io.tmpdir=D:\c++\my-blog\.run-tmp -jar target/my-blog-0.0.1-SNAPSHOT.jar
+```
+
+该目录已加入 `.gitignore`。正常开发机上不会遇到这个问题，但排查思路（先看内嵌容器需要的临时目录/端口，再看数据库）值得记一笔。
+
+**3. 复选框绑定陷阱：没勾「立即发布」却发布了出去**
+一开始后台表单直接绑定 `Article` 实体，而实体字段声明成了 `private Boolean published = true;`。这样当请求里**完全没有** `published` 参数时（例如用脚本或接口直接 POST），Spring 不会覆盖这个初始值，文章就被当成已发布。修复方式是引入 `ArticleForm` DTO：把发布状态声明为原始类型 `boolean`，并在 DTO 上集中处理语义与校验注解。同时确认了浏览器表单的行为——Thymeleaf 的 `th:field` 渲染复选框时会额外生成一个 `_published` 隐藏字段，Spring 据此把「未勾选」正确绑定为 `false`。这条经验也写进了 `ArticleForm` 的类注释。
+
+**4. 多条件动态查询怎么拼**
+「只看已发布 + 关键字 + 分类」三个条件两两组合，用方法名派生要写 8 个 `findBy...And...Or...`。改用 `JpaSpecificationExecutor` 动态拼 `Predicate`，配合 `PageRequest` 统一处理分页与排序，同时在 Service 里把 `page`、`size` 收敛到安全范围（`size` 上限 50），避免非法参数打穿。
+
+**5. 关键字搜索踩到 CLOB 的坑**
+最初把正文也纳入关键字匹配，写成 `cb.like(cb.lower(root.get("content")), like)`，运行时报错：
+`Parameter 1 of function 'lower()' has type 'STRING', but argument is of type 'java.lang.String'`。
+原因是正文用 `@Lob` 映射成了 CLOB，Hibernate 不允许对 CLOB 调用 `lower()`。
+由于正文必须保留大文本映射（H2 是 CLOB、MySQL 是 LONGTEXT），最终把搜索范围收敛为标题与标签，
+并在 `ArticleService` 里写下注释说明原因——中文正文本身也没有大小写问题，这个取舍是合理的。
+
+**6. H2 与 MySQL 的差异**
+`@Lob` 映射大文本时两种数据库的列类型不同（H2 为 CLOB，MySQL 为 LONGTEXT），开发用 H2、生产用 MySQL 时要注意方言；本项目通过 profile 分离配置（`application.yml` 用 H2、`application-mysql.yml` 用 MySQL）并额外提供 `db/schema-mysql.sql`，切换时只改启动参数。
+
+**7. Windows 下提交中文信息**
+命令行直接传中文有时会乱码，改用 `git commit -F 提交信息.txt` 从 UTF-8 文件读取，保证 `git log` 显示正常。
+
+**8. 推送 GitHub 时连接超时**
+`api.github.com` 正常但 `github.com:443` 超时，排查发现本机 DNS 把 `github.com` 解析到了一个不可达的 IP。临时绕过方式（无需管理员权限改 hosts）：
+
+```powershell
+git -c http.curloptResolve=github.com:443:140.82.114.3 push
+```
+
+这也是"能连上 API 却推不动代码"这类问题的通用排查思路：先分开测 API 域与 git 域，再确认 DNS 解析结果。
+
+## 已知限制与后续计划
+
+- 无登录验证（按需求），后台接口对任何人开放
+- 正文按纯文本渲染（保留换行），暂不支持 Markdown
+- 未实现评论、标签页、RSS、图片上传
+- 未做打包部署（Docker / Nginx）与生产级配置（连接池、日志切割）

@@ -575,6 +575,112 @@ textarea {
     text-align: center;
 }
 
+/* ===== 搜索栏 ===== */
+.search-bar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.search-bar input[type="text"] {
+    flex: 1;
+}
+
+.search-hint {
+    margin: 0 0 14px;
+    color: var(--muted);
+    font-size: 13px;
+}
+
+/* ===== 分页 ===== */
+.pagination {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    justify-content: center;
+    margin: 26px 0 10px;
+}
+
+.page-link {
+    min-width: 34px;
+    padding: 6px 10px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: #fff;
+    color: #37404a;
+    font-size: 14px;
+    text-align: center;
+}
+
+.page-link:hover {
+    border-color: #c9d2e3;
+    color: var(--accent);
+}
+
+.page-link.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+}
+
+.page-link.disabled {
+    color: #c3cad4;
+    pointer-events: none;
+}
+
+/* ===== 表单校验提示 ===== */
+.field.has-error input,
+.field.has-error textarea {
+    border-color: var(--danger);
+}
+
+.field-error {
+    margin: 6px 0 0;
+    color: var(--danger);
+    font-size: 13px;
+}
+
+.alert-error {
+    border-color: #f6c9ca;
+    background: #fff5f5;
+    color: #b32b2f;
+}
+
+/* ===== 侧边栏分类计数 ===== */
+.category-list li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.category-list a.active {
+    color: var(--accent);
+    font-weight: 700;
+}
+
+.category-list .count {
+    color: var(--muted);
+    font-size: 12px;
+}
+
+/* ===== 错误页 ===== */
+.error-page {
+    padding: 48px 24px;
+    text-align: center;
+}
+
+.error-code {
+    margin: 0;
+    color: #d7dde8;
+    font-size: 56px;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.center-actions {
+    justify-content: center;
+}
+
 /* ===== 响应式 ===== */
 @media (max-width: 860px) {
     .layout {

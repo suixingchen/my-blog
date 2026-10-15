@@ -1,13 +1,22 @@
 package com.example.blog.service;
 
+import com.example.blog.dto.ArticleForm;
 import com.example.blog.entity.Article;
 import com.example.blog.repository.ArticleRepository;
+import jakarta.persistence.criteria.Predicate;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
-import java.util.LinkedHashSet;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
 /**
  * 文章业务逻辑。
@@ -21,16 +30,66 @@ public class ArticleService {
         this.articleRepository = articleRepository;
     }
 
-    /** 前台文章列表（仅已发布） */
+    /**
+     * 前台分页查询：只查已发布文章，可选关键字（标题或正文）与分类过滤。
+     */
     @Transactional(readOnly = true)
-    public List<Article> listPublished() {
-        return articleRepository.findByPublishedTrueOrderByCreatedAtDesc();
+    public Page<Article> searchPublished(String keyword, String category, int page, int size) {
+        return articleRepository.findAll(publishedSpec(keyword, category, true), pageable(page, size));
     }
 
-    /** 后台文章列表（含草稿） */
+    /**
+     * 后台分页查询：包含草稿，仅支持关键字过滤。
+     */
     @Transactional(readOnly = true)
-    public List<Article> listAll() {
-        return articleRepository.findAllByOrderByCreatedAtDesc();
+    public Page<Article> searchAll(String keyword, int page, int size) {
+        return articleRepository.findAll(publishedSpec(keyword, null, false), pageable(page, size));
+    }
+
+    /**
+     * 详情页用的相关文章：同分类优先，不足时用最新文章补齐。
+     */
+    @Transactional(readOnly = true)
+    public List<Article> findRelated(Article current, int limit) {
+        Pageable pageable = PageRequest.of(0, limit, Sort.by(Sort.Direction.DESC, "createdAt"));
+        return articleRepository.findAll((root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            predicates.add(cb.isTrue(root.get("published")));
+            predicates.add(cb.notEqual(root.get("id"), current.getId()));
+            if (StringUtils.hasText(current.getCategory())) {
+                predicates.add(cb.equal(root.get("category"), current.getCategory()));
+            }
+            return cb.and(predicates.toArray(new Predicate[0]));
+        }, pageable).getContent().stream().filter(item -> !item.getId().equals(current.getId())).toList();
+    }
+
+    private Pageable pageable(int page, int size) {
+        int safePage = Math.max(page, 1);
+        int safeSize = Math.min(Math.max(size, 1), 50);
+        return PageRequest.of(safePage - 1, safeSize, Sort.by(Sort.Direction.DESC, "createdAt", "id"));
+    }
+
+    private Specification<Article> publishedSpec(String keyword, String category, boolean onlyPublished) {
+        return (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            if (onlyPublished) {
+                predicates.add(cb.isTrue(root.get("published")));
+            }
+            if (StringUtils.hasText(category)) {
+                predicates.add(cb.equal(root.get("category"), category.trim()));
+            }
+            if (StringUtils.hasText(keyword)) {
+                String like = "%" + keyword.trim().toLowerCase() + "%";
+                // 只对标题与标签做不区分大小写的匹配。
+                // 正文映射成 @Lob（CLOB），Hibernate 不允许对 CLOB 调用 lower()，
+                // 强行匹配会在运行期抛 "Parameter 1 of function 'lower()' has type 'STRING'"。
+                predicates.add(cb.or(
+                        cb.like(cb.lower(root.get("title")), like),
+                        cb.like(cb.lower(root.get("tags")), like)
+                ));
+            }
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
     }
 
     /**
@@ -54,7 +113,7 @@ public class ArticleService {
 
     /** 新增文章 */
     @Transactional
-    public Article create(Article form) {
+    public Article create(ArticleForm form) {
         Article article = new Article();
         applyForm(article, form);
         return articleRepository.save(article);
@@ -64,25 +123,24 @@ public class ArticleService {
      * 更新文章：只覆盖允许编辑的字段，阅读量与创建时间保持不变。
      */
     @Transactional
-    public Article update(Long id, Article form) {
+    public Article update(Long id, ArticleForm form) {
         Article article = getById(id);
         applyForm(article, form);
         return articleRepository.save(article);
     }
 
-    /**
-     * 把表单字段复制到实体。
-     * <p>注意 published 的语义：复选框未勾选时 Spring 不会绑定该字段（保持 null），
-     * 这里统一按「未勾选 = 草稿」处理。</p>
-     */
-    private void applyForm(Article article, Article form) {
-        article.setTitle(form.getTitle());
-        article.setSummary(form.getSummary());
+    private void applyForm(Article article, ArticleForm form) {
+        article.setTitle(form.getTitle() == null ? null : form.getTitle().trim());
+        article.setSummary(form.getSummary() == null ? null : form.getSummary().trim());
         article.setContent(form.getContent());
-        article.setCategory(form.getCategory());
-        article.setTags(form.getTags());
-        article.setAuthor(form.getAuthor());
-        article.setPublished(Boolean.TRUE.equals(form.getPublished()));
+        article.setCategory(blankToNull(form.getCategory()));
+        article.setTags(blankToNull(form.getTags()));
+        article.setAuthor(form.getAuthor() == null ? null : form.getAuthor().trim());
+        article.setPublished(form.isPublished());
+    }
+
+    private String blankToNull(String value) {
+        return StringUtils.hasText(value) ? value.trim() : null;
     }
 
     /** 删除文章 */
@@ -107,15 +165,13 @@ public class ArticleService {
         return articleRepository.count();
     }
 
-    /** 汇总所有分类，用于侧边栏 */
+    /** 分类 -> 已发布文章数，用于侧边栏按热度排列 */
     @Transactional(readOnly = true)
-    public List<String> listCategories() {
-        Set<String> categories = new LinkedHashSet<>();
-        for (Article article : articleRepository.findByPublishedTrueOrderByCreatedAtDesc()) {
-            if (article.getCategory() != null && !article.getCategory().isBlank()) {
-                categories.add(article.getCategory().trim());
-            }
+    public Map<String, Long> categoryCounts() {
+        Map<String, Long> counts = new LinkedHashMap<>();
+        for (Object[] row : articleRepository.countGroupByCategory()) {
+            counts.put((String) row[0], ((Number) row[1]).longValue());
         }
-        return List.copyOf(categories);
+        return counts;
     }
 }

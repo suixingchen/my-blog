@@ -23,10 +23,7 @@ public class ArticleController {
     public String detail(@PathVariable Long id, Model model) {
         Article article = articleService.viewAndIncrease(id);
         model.addAttribute("article", article);
-        model.addAttribute("related", articleService.listPublished().stream()
-                .filter(item -> !item.getId().equals(id))
-                .limit(5)
-                .toList());
+        model.addAttribute("related", articleService.findRelated(article, 5));
         return "article";
     }
 }

@@ -14,6 +14,7 @@
     </div>
 
     <div class="alert" th:if="${message}" th:text="${message}">操作成功</div>
+    <div class="alert alert-error" th:if="${errorMessage}" th:text="${errorMessage}">操作失败</div>
 
     <div class="stats">
         <div class="stat">
@@ -29,6 +30,12 @@
             <span class="stat-label">草稿</span>
         </div>
     </div>
+
+    <form class="search-bar" th:action="@{/admin}" method="get">
+        <input type="text" name="keyword" th:value="${keyword}" placeholder="按标题或标签搜索…">
+        <button type="submit" class="btn btn-primary">搜索</button>
+        <a class="btn" th:href="@{/admin}" th:if="${keyword != null and !keyword.isBlank()}">清空</a>
+    </form>
 
     <div class="card table-card">
         <table class="admin-table">
@@ -64,11 +71,22 @@
                 </td>
             </tr>
             <tr th:if="${#lists.isEmpty(articles)}">
-                <td colspan="6" class="muted center">还没有文章，点击右上角「写新文章」开始吧。</td>
+                <td colspan="6" class="muted center">没有匹配的文章。</td>
             </tr>
             </tbody>
         </table>
     </div>
+
+    <nav class="pagination" th:if="${articlePage.totalPages > 1}">
+        <a class="page-link" th:classappend="${articlePage.first} ? 'disabled'"
+           th:href="@{/admin(page=${articlePage.number}, keyword=${keyword})}">上一页</a>
+        <a class="page-link" th:each="i : ${#numbers.sequence(1, articlePage.totalPages)}"
+           th:classappend="${i == articlePage.number + 1} ? 'active'"
+           th:href="@{/admin(page=${i}, keyword=${keyword})}"
+           th:text="${i}">1</a>
+        <a class="page-link" th:classappend="${articlePage.last} ? 'disabled'"
+           th:href="@{/admin(page=${articlePage.number + 2}, keyword=${keyword})}">下一页</a>
+    </nav>
 </main>
 
 <footer th:replace="~{fragments/layout :: footer}"></footer>

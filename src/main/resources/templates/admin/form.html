@@ -13,38 +13,49 @@
         <a class="btn" th:href="@{/admin}">返回列表</a>
     </div>
 
-    <form class="card form-card" th:object="${article}"
-          th:action="${mode == 'create'} ? @{/admin/articles} : @{/admin/articles/{id}(id=${article.id})}"
+    <form class="card form-card" th:object="${articleForm}"
+          th:action="${mode == 'create'} ? @{/admin/articles} : @{/admin/articles/{id}(id=${articleForm.id})}"
           method="post">
 
-        <div class="field">
+        <!-- #fields 必须在 th:object 作用域内使用，放到 form 外面会在渲染时抛异常 -->
+        <div class="alert alert-error" th:if="${#fields.hasAnyErrors()}">
+            保存失败，请检查下面的表单提示。
+        </div>
+
+        <div class="field" th:classappend="${#fields.hasErrors('title')} ? 'has-error'">
             <label for="title">标题 <span class="required">*</span></label>
-            <input type="text" id="title" th:field="*{title}" placeholder="给文章起个标题" required maxlength="150">
+            <input type="text" id="title" th:field="*{title}" placeholder="给文章起个标题" maxlength="150">
+            <p class="field-error" th:if="${#fields.hasErrors('title')}" th:errors="*{title}">标题错误</p>
         </div>
 
         <div class="field-row">
-            <div class="field">
+            <div class="field" th:classappend="${#fields.hasErrors('category')} ? 'has-error'">
                 <label for="category">分类</label>
                 <input type="text" id="category" th:field="*{category}" placeholder="例如：后端" maxlength="50">
+                <p class="field-error" th:if="${#fields.hasErrors('category')}" th:errors="*{category}">分类错误</p>
             </div>
-            <div class="field">
+            <div class="field" th:classappend="${#fields.hasErrors('tags')} ? 'has-error'">
                 <label for="tags">标签</label>
                 <input type="text" id="tags" th:field="*{tags}" placeholder="多个标签用英文逗号分隔" maxlength="200">
+                <p class="field-error" th:if="${#fields.hasErrors('tags')}" th:errors="*{tags}">标签错误</p>
             </div>
-            <div class="field">
+            <div class="field" th:classappend="${#fields.hasErrors('author')} ? 'has-error'">
                 <label for="author">作者</label>
                 <input type="text" id="author" th:field="*{author}" maxlength="50">
+                <p class="field-error" th:if="${#fields.hasErrors('author')}" th:errors="*{author}">作者错误</p>
             </div>
         </div>
 
-        <div class="field">
+        <div class="field" th:classappend="${#fields.hasErrors('summary')} ? 'has-error'">
             <label for="summary">摘要</label>
             <input type="text" id="summary" th:field="*{summary}" placeholder="留空则自动截取正文前 120 字" maxlength="300">
+            <p class="field-error" th:if="${#fields.hasErrors('summary')}" th:errors="*{summary}">摘要错误</p>
         </div>
 
-        <div class="field">
+        <div class="field" th:classappend="${#fields.hasErrors('content')} ? 'has-error'">
             <label for="content">正文 <span class="required">*</span></label>
-            <textarea id="content" th:field="*{content}" rows="16" placeholder="开始写作…" required></textarea>
+            <textarea id="content" th:field="*{content}" rows="16" placeholder="开始写作…"></textarea>
+            <p class="field-error" th:if="${#fields.hasErrors('content')}" th:errors="*{content}">正文错误</p>
         </div>
 
         <div class="field checkbox-field">
@@ -56,7 +67,7 @@
 
         <div class="form-actions">
             <button type="submit" class="btn btn-primary"
-                    th:text="${mode == 'create'} ? '发布文章' : '保存修改'">发布文章</button>
+                    th:text="${mode == 'create'} ? '保存文章' : '保存修改'">保存文章</button>
             <a class="btn" th:href="@{/admin}">取消</a>
         </div>
     </form>

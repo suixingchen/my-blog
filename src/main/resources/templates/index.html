@@ -11,6 +11,21 @@
             <p th:text="${blogSubtitle}">记录学习与生活的角落</p>
         </section>
 
+        <form class="search-bar" th:action="@{/}" method="get">
+            <input type="text" name="keyword" th:value="${keyword}" placeholder="搜索标题或标签…">
+            <input type="hidden" name="category" th:value="${currentCategory}" th:if="${currentCategory != null}">
+            <button type="submit" class="btn btn-primary">搜索</button>
+            <a class="btn" th:href="@{/}" th:if="${keyword != null and !keyword.isBlank()}">清空</a>
+        </form>
+
+        <p class="search-hint" th:if="${(keyword != null and !keyword.isBlank()) or currentCategory != null}">
+            共找到
+            <strong th:text="${articlePage.totalElements}">0</strong>
+            篇文章
+            <span th:if="${keyword != null and !keyword.isBlank()}">，关键字「<strong th:text="${keyword}"></strong>」</span>
+            <span th:if="${currentCategory != null}">，分类「<strong th:text="${currentCategory}"></strong>」</span>
+        </p>
+
         <section class="post-list">
             <article class="post-card" th:each="post : ${posts}">
                 <h2 class="post-title">
@@ -18,7 +33,8 @@
                 </h2>
 
                 <p class="meta">
-                    <span class="badge" th:if="${post.category != null}" th:text="${post.category}">分类</span>
+                    <a class="badge" th:if="${post.category != null}"
+                       th:href="@{/(category=${post.category})}" th:text="${post.category}">分类</a>
                     <span th:text="${#temporals.format(post.createdAt, 'yyyy-MM-dd')}">2024-05-01</span>
                     <span>·</span>
                     <span th:text="${post.views} + ' 次阅读'">0 次阅读</span>
@@ -35,8 +51,20 @@
             </article>
         </section>
 
+        <nav class="pagination" th:if="${articlePage.totalPages > 1}">
+            <a class="page-link" th:classappend="${articlePage.first} ? 'disabled'"
+               th:href="@{/(page=${articlePage.number}, keyword=${keyword}, category=${currentCategory})}">上一页</a>
+            <a class="page-link" th:each="i : ${#numbers.sequence(1, articlePage.totalPages)}"
+               th:classappend="${i == articlePage.number + 1} ? 'active'"
+               th:href="@{/(page=${i}, keyword=${keyword}, category=${currentCategory})}"
+               th:text="${i}">1</a>
+            <a class="page-link" th:classappend="${articlePage.last} ? 'disabled'"
+               th:href="@{/(page=${articlePage.number + 2}, keyword=${keyword}, category=${currentCategory})}">下一页</a>
+        </nav>
+
         <div class="card empty" th:if="${#lists.isEmpty(posts)}">
-            <p>还没有已发布的文章。</p>
+            <p th:if="${keyword != null and !keyword.isBlank()}">没有匹配「<span th:text="${keyword}"></span>」的文章，换个关键字试试。</p>
+            <p th:unless="${keyword != null and !keyword.isBlank()}">还没有已发布的文章。</p>
             <a class="btn btn-primary" th:href="@{/admin/articles/new}">去写第一篇</a>
         </div>
     </div>
