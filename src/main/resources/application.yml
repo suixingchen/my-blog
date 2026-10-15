@@ -1,0 +1,13 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: my-blog
+  thymeleaf:
+    cache: false
+
+blog:
+  title: 我的个人博客
+  subtitle: 记录学习与生活的角落
+  author: 博主

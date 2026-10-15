@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${blogTitle}">我的个人博客</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<header class="site-header">
+    <div class="container header-inner">
+        <a class="brand" th:href="@{/}" th:text="${blogTitle}">我的个人博客</a>
+        <nav class="nav">
+            <a th:href="@{/}">首页</a>
+        </nav>
+    </div>
+</header>
+
+<main class="container">
+    <section class="hero">
+        <h1 th:text="${blogTitle}">我的个人博客</h1>
+        <p th:text="${blogSubtitle}">记录学习与生活的角落</p>
+    </section>
+
+    <section class="post-list">
+        <article class="post-card" th:each="post : ${posts}">
+            <h2 th:text="${post.title}">文章标题</h2>
+            <p class="meta">
+                <span th:text="${post.category}">分类</span>
+                ·
+                <span th:text="${post.createdAt}">2024-05-01</span>
+            </p>
+            <p th:text="${post.summary}">摘要</p>
+        </article>
+    </section>
+</main>
+
+<footer class="site-footer">
+    <div class="container">
+        <p>© 2024 <span th:text="${blogAuthor}">博主</span> · Powered by Spring Boot</p>
+    </div>
+</footer>
+</body>
+</html>

@@ -1,0 +1,108 @@
+:root {
+    --bg: #f6f8fa;
+    --card: #ffffff;
+    --text: #24292f;
+    --muted: #6a737d;
+    --accent: #2f6feb;
+    --border: #e5e7eb;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Microsoft YaHei", -apple-system, "Segoe UI", sans-serif;
+    line-height: 1.7;
+}
+
+.container {
+    width: 100%;
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.site-header {
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+}
+
+.header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 60px;
+}
+
+.brand {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text);
+    text-decoration: none;
+}
+
+.nav a {
+    margin-left: 18px;
+    color: var(--muted);
+    text-decoration: none;
+}
+
+.nav a:hover {
+    color: var(--accent);
+}
+
+.hero {
+    padding: 48px 0 24px;
+    text-align: center;
+}
+
+.hero h1 {
+    margin: 0 0 8px;
+    font-size: 30px;
+}
+
+.hero p {
+    margin: 0;
+    color: var(--muted);
+}
+
+.post-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin-bottom: 16px;
+}
+
+.post-card h2 {
+    margin: 0 0 6px;
+    font-size: 20px;
+}
+
+.post-card h2 a {
+    color: var(--text);
+    text-decoration: none;
+}
+
+.post-card h2 a:hover {
+    color: var(--accent);
+}
+
+.meta {
+    margin: 0 0 10px;
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.site-footer {
+    margin-top: 40px;
+    padding: 24px 0;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 13px;
+    text-align: center;
+}
