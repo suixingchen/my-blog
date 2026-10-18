@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head th:fragment="head(title)">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -17,6 +18,17 @@
         <nav class="nav">
             <a th:href="@{/}">首页</a>
             <a th:href="@{/admin}">后台管理</a>
+
+            <!-- 已登录：显示当前账号 + 退出按钮（退出必须是 POST + CSRF token） -->
+            <span sec:authorize="isAuthenticated()" style="display:inline">
+                <span class="nav-user" sec:authentication="name">admin</span>
+                <form th:action="@{/logout}" method="post" style="display:inline">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <button type="submit" class="btn btn-sm">退出</button>
+                </form>
+            </span>
+            <!-- 未登录：显示登录入口 -->
+            <a sec:authorize="!isAuthenticated()" th:href="@{/login}">登录</a>
         </nav>
     </div>
 </header>

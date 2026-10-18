@@ -51,6 +51,18 @@
             <scope>runtime</scope>
         </dependency>
 
+        <!-- 安全框架：登录验证、权限控制、CSRF 防护 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+
+        <!-- 让 Thymeleaf 模板里能用 sec:authorize 判断"是否已登录" -->
+        <dependency>
+            <groupId>org.thymeleaf.extras</groupId>
+            <artifactId>thymeleaf-extras-springsecurity6</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>

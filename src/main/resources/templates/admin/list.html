@@ -66,6 +66,8 @@
                     <form th:action="@{/admin/articles/{id}/delete(id=${article.id})}" method="post"
                           class="inline-form"
                           onsubmit="return confirm('确定删除这篇文章吗？');">
+                        <!-- CSRF token：缺了会被 Spring Security 拒绝（403） -->
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                         <button type="submit" class="btn btn-sm btn-danger">删除</button>
                     </form>
                 </td>

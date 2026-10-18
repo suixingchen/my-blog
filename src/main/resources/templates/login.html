@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录 · <span th:text="${blogTitle}">我的个人博客</span></title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        /* 登录页专用样式，只在这一个页面生效 */
+        .login-wrap {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .login-card {
+            width: 100%;
+            max-width: 380px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 32px 30px 26px;
+        }
+        .login-card h1 {
+            margin: 0 0 6px;
+            font-size: 22px;
+            text-align: center;
+        }
+        .login-card .sub {
+            margin: 0 0 24px;
+            text-align: center;
+            color: var(--muted);
+            font-size: 13px;
+        }
+        .login-card label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .login-card input[type="text"],
+        .login-card input[type="password"] {
+            width: 100%;
+            padding: 9px 12px;
+            margin-bottom: 16px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+        .login-card input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(59, 110, 245, .12);
+        }
+        .login-card button {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            background: var(--accent);
+            color: #fff;
+            font-size: 15px;
+            font-family: inherit;
+            cursor: pointer;
+        }
+        .login-card button:hover { background: var(--accent-dark); }
+        .login-error {
+            margin: 0 0 16px;
+            padding: 9px 12px;
+            border: 1px solid #f6c9ca;
+            border-radius: 8px;
+            background: #fff5f5;
+            color: #b32b2f;
+            font-size: 13px;
+        }
+        .login-back {
+            display: block;
+            margin-top: 18px;
+            text-align: center;
+            font-size: 13px;
+            color: var(--muted);
+        }
+    </style>
+</head>
+<body>
+
+<div class="login-wrap">
+    <div class="login-card">
+        <h1 th:text="${blogTitle}">我的个人博客</h1>
+        <p class="sub">后台管理登录</p>
+
+        <!-- 登录失败时，Spring Security 会重定向到 /login?error -->
+        <p class="login-error" th:if="${param.error}">账号或密码不对，请重试</p>
+        <!-- 退出登录后跳回这里，/login?logout -->
+        <p class="login-error" style="border-color:#bfe3c8;background:#f0fbf3;color:#1f7a3d"
+           th:if="${param.logout}">你已安全退出</p>
+
+        <!--
+          这个表单会提交到 Spring Security 的登录接口（默认地址就是 /login）。
+          post 到哪里、字段叫什么，都是框架约定好的：
+            username / password / _csrf
+        -->
+        <form th:action="@{/login}" method="post">
+            <!-- CSRF token：不带它，Spring Security 会直接拒绝这次提交（403） -->
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+            <label for="username">账号</label>
+            <input type="text" id="username" name="username" placeholder="admin" required autofocus>
+
+            <label for="password">密码</label>
+            <input type="password" id="password" name="password" placeholder="请输入密码" required>
+
+            <button type="submit">登录</button>
+        </form>
+
+        <a class="login-back" th:href="@{/}">← 返回博客首页</a>
+    </div>
+</div>
+
+</body>
+</html>

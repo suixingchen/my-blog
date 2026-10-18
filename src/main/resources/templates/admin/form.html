@@ -17,6 +17,9 @@
           th:action="${mode == 'create'} ? @{/admin/articles} : @{/admin/articles/{id}(id=${articleForm.id})}"
           method="post">
 
+        <!-- CSRF token：Spring Security 会校验它，缺了直接 403 -->
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
         <!-- #fields 必须在 th:object 作用域内使用，放到 form 外面会在渲染时抛异常 -->
         <div class="alert alert-error" th:if="${#fields.hasAnyErrors()}">
             保存失败，请检查下面的表单提示。
