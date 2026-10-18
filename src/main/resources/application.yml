@@ -5,16 +5,18 @@ spring:
   application:
     name: my-blog
 
-  # 默认使用 H2 文件数据库，开箱即用；数据文件落在项目根目录的 data/ 下
+  # ===== 数据源：MySQL 8（库名 blog）=====
+  # 想换回 H2（没装 MySQL 时）就加启动参数 --spring.profiles.active=h2
   datasource:
-    url: jdbc:h2:file:./data/blogdb;AUTO_SERVER=TRUE;DB_CLOSE_DELAY=-1
-    driver-class-name: org.h2.Driver
-    username: sa
-    password: ""
+    url: jdbc:mysql://localhost:3306/blog?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useSSL=false
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: "123456"
 
   jpa:
     hibernate:
       ddl-auto: update
+    database-platform: org.hibernate.dialect.MySQLDialect
     open-in-view: false
     show-sql: false
     properties:
@@ -23,11 +25,16 @@ spring:
 
   h2:
     console:
-      enabled: true
-      path: /h2-console
+      enabled: false
 
   thymeleaf:
     cache: false
+
+  # 上传壁纸的大小限制
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 5MB
 
 blog:
   title: 我的个人博客
@@ -35,6 +42,8 @@ blog:
   author: suixingchen
   # 前台与后台列表每页条数
   page-size: 5
+  # 壁纸文件存放目录（相对项目根目录）
+  upload-dir: ./uploads
 
 logging:
   level:

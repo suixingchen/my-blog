@@ -31,9 +31,9 @@ public class Article {
     @Column(length = 300)
     private String summary;
 
-    /** 正文 */
+    /** 正文（长文本：MySQL 上是 text，H2 上是 CLOB） */
     @Lob
-    @Column(nullable = false)
+    @Column(nullable = false, length = 65535)
     private String content;
 
     /** 分类 */
