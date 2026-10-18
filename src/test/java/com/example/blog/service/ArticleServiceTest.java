@@ -3,6 +3,7 @@ package com.example.blog.service;
 import com.example.blog.dto.ArticleForm;
 import com.example.blog.entity.Article;
 import com.example.blog.repository.ArticleRepository;
+import com.example.blog.repository.CommentRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -22,11 +23,14 @@ class ArticleServiceTest {
     @Autowired
     private ArticleRepository articleRepository;
 
+    @Autowired
+    private CommentRepository commentRepository;
+
     private ArticleService articleService;
 
     @BeforeEach
     void setUp() {
-        articleService = new ArticleService(articleRepository);
+        articleService = new ArticleService(articleRepository, commentRepository);
     }
 
     @Test

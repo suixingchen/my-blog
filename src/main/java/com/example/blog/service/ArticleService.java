@@ -3,6 +3,7 @@ package com.example.blog.service;
 import com.example.blog.dto.ArticleForm;
 import com.example.blog.entity.Article;
 import com.example.blog.repository.ArticleRepository;
+import com.example.blog.repository.CommentRepository;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -25,9 +26,11 @@ import java.util.Map;
 public class ArticleService {
 
     private final ArticleRepository articleRepository;
+    private final CommentRepository commentRepository;
 
-    public ArticleService(ArticleRepository articleRepository) {
+    public ArticleService(ArticleRepository articleRepository, CommentRepository commentRepository) {
         this.articleRepository = articleRepository;
+        this.commentRepository = commentRepository;
     }
 
     /**
@@ -143,10 +146,11 @@ public class ArticleService {
         return StringUtils.hasText(value) ? value.trim() : null;
     }
 
-    /** 删除文章 */
+    /** 删除文章（同时删掉它的评论，避免留下"孤儿"评论） */
     @Transactional
     public void delete(Long id) {
         Article article = getById(id);
+        commentRepository.deleteByArticleId(id);
         articleRepository.delete(article);
     }
 

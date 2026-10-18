@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head th:replace="~{fragments/layout :: head(${article.title})}"></head>
 <body>
 <header th:replace="~{fragments/layout :: header}"></header>
@@ -31,6 +32,56 @@
                 <a class="btn" th:href="@{/admin/articles/{id}/edit(id=${article.id})}">编辑这篇文章</a>
             </footer>
         </article>
+
+        <!-- ==================== 评论区 ==================== -->
+        <section class="card" id="comments">
+            <h4 class="card-title">
+                评论 <span class="comment-count" th:text="${#lists.size(comments)}">0</span>
+            </h4>
+
+            <div class="alert" th:if="${commentOk}" th:text="${commentOk}">评论已发布</div>
+            <div class="alert alert-error" th:if="${commentError}" th:text="${commentError}">出错了</div>
+
+            <!-- 发表评论：只有登录用户能看到表单 -->
+            <form sec:authorize="isAuthenticated()" class="comment-form"
+                  th:action="@{/article/{id}/comments(id=${article.id})}" method="post">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                <textarea name="content" rows="3" maxlength="500"
+                          placeholder="说点什么……（最多 500 字）" required></textarea>
+                <div class="comment-form-foot">
+                    <span class="muted">
+                        当前登录：<span sec:authentication="name">admin</span>
+                    </span>
+                    <button type="submit" class="btn btn-primary">发表评论</button>
+                </div>
+            </form>
+
+            <!-- 没登录：提示先去登录 -->
+            <p class="muted comment-login-tip" sec:authorize="!isAuthenticated()">
+                想留言？请先 <a th:href="@{/login}">登录</a>。
+            </p>
+
+            <!-- 评论列表 -->
+            <ul class="comment-list" th:if="${not #lists.isEmpty(comments)}">
+                <li class="comment-item" th:each="c : ${comments}">
+                    <div class="comment-head">
+                        <strong th:text="${c.author}">admin</strong>
+                        <span class="muted"
+                              th:text="${#temporals.format(c.createdAt, 'yyyy-MM-dd HH:mm')}">时间</span>
+                        <!-- 只有管理员能看到删除按钮 -->
+                        <form sec:authorize="hasRole('ADMIN')" class="inline-form"
+                              th:action="@{/admin/comments/{id}/delete(id=${c.id})}" method="post"
+                              onsubmit="return confirm('确定删除这条评论吗？');">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                            <button type="submit" class="btn btn-sm btn-danger">删除</button>
+                        </form>
+                    </div>
+                    <p class="comment-body" th:text="${c.content}">评论内容</p>
+                </li>
+            </ul>
+
+            <p class="muted" th:if="${#lists.isEmpty(comments)}">还没有评论，来抢个沙发。</p>
+        </section>
 
         <section class="card" th:if="${not #lists.isEmpty(related)}">
             <h4 class="card-title">继续阅读</h4>
