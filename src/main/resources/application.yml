@@ -16,7 +16,8 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
-    database-platform: org.hibernate.dialect.MySQLDialect
+    # 故意不写 database-platform：让 Hibernate 按实际连接自动选方言。
+    # 写死 MySQLDialect 会让 @DataJpaTest 用内嵌 H2 时也生成 MySQL 的 DDL（engine=InnoDB）而报错。
     open-in-view: false
     show-sql: false
     properties:
