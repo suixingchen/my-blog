@@ -10,7 +10,10 @@
             <h1>后台管理</h1>
             <p class="muted">管理全部文章，包括未发布的草稿</p>
         </div>
-        <a class="btn btn-primary" th:href="@{/admin/articles/new}">+ 写新文章</a>
+        <div style="display:flex;gap:8px">
+            <a class="btn" th:href="@{/admin/settings}">更换壁纸</a>
+            <a class="btn btn-primary" th:href="@{/admin/articles/new}">+ 写新文章</a>
+        </div>
     </div>
 
     <div class="alert" th:if="${message}" th:text="${message}">操作成功</div>

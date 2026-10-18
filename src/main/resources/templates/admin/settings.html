@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('外观设置')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main class="container narrow">
+    <div class="page-head">
+        <div>
+            <h1>外观设置</h1>
+            <p class="muted">更换博客的背景壁纸，保存后全站立即生效</p>
+        </div>
+        <a class="btn" th:href="@{/admin}">返回后台</a>
+    </div>
+
+    <div class="alert" th:if="${message}" th:text="${message}">操作成功</div>
+    <div class="alert alert-error" th:if="${errorMessage}" th:text="${errorMessage}">操作失败</div>
+
+    <!-- 当前壁纸预览 -->
+    <div class="card">
+        <h4 class="card-title">当前背景</h4>
+        <div th:if="${setting.bgImage == null}" class="muted">正在使用默认背景（没有设置壁纸）</div>
+        <div th:if="${setting.bgImage != null}">
+            <p class="muted">
+                当前壁纸：<code th:text="${setting.bgImage}">/uploads/xxx.jpg</code>
+                <span th:if="${setting.updatedAt != null}"
+                      th:text="'（更新于 ' + ${#temporals.format(setting.updatedAt, 'yyyy-MM-dd HH:mm')} + '）'"></span>
+            </p>
+            <div class="bg-preview" th:style="'background-image:url(' + ${setting.bgImage} + ')'"></div>
+        </div>
+    </div>
+
+    <!-- 上传新壁纸 -->
+    <form class="card form-card" th:action="@{/admin/settings/background}" method="post"
+          enctype="multipart/form-data">
+        <!-- 上传表单同样需要 CSRF token，而且必须是 multipart/form-data -->
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+        <h4 class="card-title">更换壁纸</h4>
+        <div class="field">
+            <label for="file">选择图片（jpg / png / gif / webp，不超过 5MB）</label>
+            <input type="file" id="file" name="file" accept="image/*" required>
+        </div>
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">上传并应用</button>
+        </div>
+    </form>
+
+    <!-- 恢复默认 -->
+    <form class="card form-card" th:action="@{/admin/settings/background/reset}" method="post"
+          th:if="${setting.bgImage != null}">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+        <h4 class="card-title">恢复默认</h4>
+        <p class="muted">会清除壁纸设置并删除已上传的图片文件。</p>
+        <div class="form-actions">
+            <button type="submit" class="btn btn-danger"
+                    onclick="return confirm('确定恢复默认背景吗？')">恢复默认背景</button>
+        </div>
+    </form>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

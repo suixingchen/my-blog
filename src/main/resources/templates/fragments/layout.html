@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title th:text="${title} + ' · ' + ${blogTitle}">我的个人博客</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
+    <!-- 动态样式表：内容由 ThemeCssController 生成，里面带着管理员设置的壁纸路径 -->
+    <link rel="stylesheet" th:href="@{/theme.css}">
 </head>
 <body>
 
@@ -18,6 +20,8 @@
         <nav class="nav">
             <a th:href="@{/}">首页</a>
             <a th:href="@{/admin}">后台管理</a>
+            <!-- 只有管理员看得到"外观设置"（换背景壁纸的入口） -->
+            <a sec:authorize="hasRole('ADMIN')" th:href="@{/admin/settings}">更换壁纸</a>
 
             <!-- 已登录：显示当前账号 + 退出按钮（退出必须是 POST + CSRF token） -->
             <span sec:authorize="isAuthenticated()" style="display:inline">

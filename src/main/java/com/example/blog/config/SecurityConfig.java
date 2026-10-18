@@ -56,8 +56,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // 1. 静态资源放行（不然登录页会没有样式）
                         .requestMatchers("/css/**", "/js/**", "/images/**", "/uploads/**", "/favicon.ico").permitAll()
-                        // 2. 前台页面放行：首页、文章详情、登录页
-                        .requestMatchers("/", "/article/**", "/login").permitAll()
+                        // 2. 前台页面放行：首页、文章详情、登录页、动态样式表
+                        .requestMatchers("/", "/article/**", "/login", "/theme.css").permitAll()
                         // 3. 后台必须登录，而且角色得是 ADMIN
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         // 4. 其余一律要求登录（比如评论接口）
