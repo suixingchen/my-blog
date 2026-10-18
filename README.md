@@ -3,29 +3,34 @@
 一个用 Spring Boot + Thymeleaf 搭建的个人博客：前台可以浏览文章列表与详情，后台可以发布、编辑、删除文章（按需求**暂不做登录验证**）。数据默认存放在本地 H2 文件数据库，也可切换到 MySQL。
 
 > 📘 **想从零跟着做一遍？** 见 [`docs/教程.md`](docs/教程.md)：按本仓库真实代码分八步讲解（骨架 → 接数据库 → 前台 → 后台 → 完善 → MySQL → 打包验收 → Git 推送），并附「常见问题速查」收录了开发中实际踩过的 12 个坑。
+>
+> 🎤 **要拿去面试/答辩？** 见 [`docs/功能讲解-面试版.md`](docs/功能讲解-面试版.md)：逐个功能讲清「涉及哪些文件、代码为什么这么写、可能被问什么」。
 
 ## 功能清单
 
 | 模块 | 功能 |
 | --- | --- |
 | 前台首页 `/` | 已发布文章分页列表、关键字搜索（标题 / 标签）、按分类筛选、侧边栏分类统计 |
-| 文章详情 `/article/{id}` | 完整正文、阅读量自增、标签、相关文章推荐、一键跳转编辑 |
+| 文章详情 `/article/{id}` | 完整正文、阅读量自增、标签、相关文章推荐 |
+| **登录验证** | Spring Security：`/admin/**` 需要 ADMIN 角色，前台公开浏览；BCrypt 存储密码；表单统一 CSRF 防护；支持退出登录 |
 | 后台 `/admin` | 全部文章列表（含草稿）、统计卡片、关键字搜索、分页 |
 | 后台写作 | 新建 / 编辑文章表单（标题、摘要、正文、分类、标签、作者、是否发布） |
 | 后台删除 | POST 删除并二次确认，操作结果以 Flash 消息提示 |
+| **评论** | 登录后可评论（未登录显示登录提示），评论存 MySQL；管理员可在评论区直接删除，删文章时评论级联清理 |
+| **更换壁纸** | 后台 `/admin/settings` 上传壁纸（jpg/png/gif/webp，≤5MB），全站背景立即生效，可一键恢复默认 |
 | 其他 | 表单校验（`@Valid` + 错误回显）、全局异常处理（404 / 500 友好页面）、首次启动写入演示数据 |
 
-> 说明：按需求本版本**没有登录与权限校验**，`/admin` 任何人访问即可管理文章。若将来要上线，请先接入 Spring Security。
+> 默认管理员账号：**`admin` / `admin123`**（写在 `SecurityConfig` 里，换成数据库用户只需要替换一个 Bean）。
 
 ## 技术栈
 
-- **后端**：Spring Boot 3.2.5、Spring MVC、Spring Data JPA（Hibernate 6）、Jakarta Bean Validation
-- **模板**：Thymeleaf 3（`th:fragment` 片段复用）
-- **数据库**：H2（文件模式，默认，免安装） / MySQL 8（`application-mysql.yml` 切换）
-- **构建**：Maven 3.9//`spring-boot-maven-plugin`
-- **前端**：手写 CSS//卡片式博客主题，响应式，无前端构建步骤
+- **后端**：Spring Boot 3.2.5、Spring MVC、Spring Data JPA（Hibernate 6）、**Spring Security 6**、Jakarta Bean Validation
+- **模板**：Thymeleaf 3（`th:fragment` 片段复用 + `thymeleaf-extras-springsecurity6` 判断登录状态）
+- **数据库**：**MySQL 8**（默认，库名 `blog`，utf8mb4）；H2 作为备用 profile（`--spring.profiles.active=h2`）
+- **构建**：Maven 3.9（`spring-boot-maven-plugin`）
+- **前端**：手写 CSS（卡片式博客主题、响应式、`/theme.css` 动态生成壁纸样式），无前端构建步骤
 - **JDK**：Java 17
-- **测试**：JUnit 5 + AssertJ + `@DataJpaTest`
+- **测试**：JUnit 5 + AssertJ + `@DataJpaTest`（14 个用例）
 
 ## 目录结构
 
@@ -81,45 +86,44 @@ $env:JAVA_HOME = 'D:\tools\jdk-17.0.20.1+1'
 </settings>
 ```
 
-### 2. 启动（默认 H2，零配置）
+### 2. 启动（默认 MySQL）
+
+先确保 MySQL 8 在运行，并建好数据库：
+
+```sql
+CREATE DATABASE IF NOT EXISTS blog DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+```
+
+然后打包运行（**注意要在项目根目录执行**，因为上传目录 `uploads/` 是相对路径）：
 
 ```powershell
 cd my-blog
-mvn spring-boot:run
-```
-
-或先打包再运行：
-
-```powershell
 mvn clean package
 java -jar target/my-blog-0.0.1-SNAPSHOT.jar
 ```
 
-启动后浏览器打开 **http://localhost:8080** 即可。数据库文件会自动生成在项目根目录 `data/blogdb.mv.db`，删除该目录即可重置数据；首次启动会自动写入 6 篇演示文章。
+浏览器打开 **http://localhost:8080**。表结构由 JPA 自动创建（`ddl-auto=update`），首次启动会写入 6 篇演示文章。
 
-H2 控制台：<http://localhost:8080/h2-console>（JDBC URL `jdbc:h2:file:./data/blogdb`，用户 `sa`，密码为空）。
+> Windows 上还有两个现成脚本（双击即可）：
+> - `start-blog.cmd` —— 自动检查/启动 MySQL，再启动博客（默认 8081 端口）
+> - `stop-blog.cmd` —— 停止博客
 
-### 3. 切换到 MySQL
-
-```sql
-CREATE DATABASE myblog DEFAULT CHARACTER SET utf8mb4;
-```
-
-修改 `src/main/resources/application-mysql.yml` 里的账号密码，然后用 mysql profile 启动：
+### 3. 没有 MySQL？用 H2 备用配置
 
 ```powershell
-mvn spring-boot:run "-Dspring-boot.run.profiles=mysql"
-# 或
-java -jar target/my-blog-0.0.1-SNAPSHOT.jar --spring.profiles.active=mysql
+java -jar target/my-blog-0.0.1-SNAPSHOT.jar --spring.profiles.active=h2
 ```
 
-表结构由 JPA 自动创建（`ddl-auto=update`）；也可以先手工执行 `db/schema-mysql.sql` 再把 `ddl-auto` 改成 `none`。
+数据文件会生成在项目根目录 `data/blogdb.mv.db`（删除该目录即可重置）；
+H2 控制台：<http://localhost:8080/h2-console>（JDBC URL `jdbc:h2:file:./data/blogdb`，用户 `sa`，密码为空）。
 
 ### 4. 运行测试
 
 ```powershell
 mvn test
 ```
+
+单元测试用 `@DataJpaTest` + 内嵌 H2，**不依赖本机 MySQL**，共 14 个用例。
 
 ## 页面与路由
 
