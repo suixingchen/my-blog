@@ -1,5 +1,9 @@
 server:
   port: 8080
+  tomcat:
+    # 上传超限时 Tomcat 默认只肯把 2MB 请求体读完就断连接，浏览器会看到"连接被重置"而不是我们的提示页。
+    # 设成 -1 = 不限制，让请求完整读完，用户才能看到"图片太大了"的友好提示。
+    max-swallow-size: -1
 
 spring:
   application:
@@ -31,11 +35,11 @@ spring:
   thymeleaf:
     cache: false
 
-  # 上传壁纸的大小限制
+  # 上传壁纸的大小限制（单个文件 40MB，单次请求也放到 40MB 以上才够用）
   servlet:
     multipart:
-      max-file-size: 5MB
-      max-request-size: 5MB
+      max-file-size: 40MB
+      max-request-size: 45MB
 
 blog:
   title: 我的个人博客

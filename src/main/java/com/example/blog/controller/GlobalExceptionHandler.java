@@ -9,6 +9,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 /**
  * 全局异常处理：把异常翻译成友好的错误页面，而不是直接抛出堆栈。
@@ -27,6 +28,19 @@ public class GlobalExceptionHandler {
         model.addAttribute("errorTitle", "文章走丢了");
         model.addAttribute("errorMessage", ex.getMessage());
         return "error/404";
+    }
+
+    /**
+     * 上传文件超过大小上限。
+     *
+     * <p>这个异常是 Tomcat 在读请求体时抛的，发生在我们 Controller 的方法执行之前，
+     * 所以没法在 Controller 里 try-catch，只能在这里统一接住，
+     * 再重定向回设置页，用 ?tooLarge=1 让页面显示一句人话提示。</p>
+     */
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public String handleUploadTooLarge(MaxUploadSizeExceededException ex, HttpServletRequest request) {
+        log.warn("上传文件超过大小上限，请求 {} 被拒绝: {}", request.getRequestURI(), ex.getMessage());
+        return "redirect:/admin/settings?tooLarge=1";
     }
 
     /** 兜底：其它未预期异常 -> 500 页面 */

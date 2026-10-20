@@ -42,5 +42,7 @@ public class GlobalModelAdvice {
         model.addAttribute("categoryCounts", articleService.categoryCounts());
         // 管理员在后台设置的壁纸路径；没设置就是 null，模板里会走默认背景
         model.addAttribute("bgImage", siteSettingService.getBackgroundUrl());
+        // 上传大小上限（比如 "40MB"），模板里直接显示，避免在页面里再写死一次数字
+        model.addAttribute("maxUploadSize", siteSettingService.getMaxSizeLabel());
     }
 }

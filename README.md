@@ -1,4 +1,4 @@
-# my-blog · Spring Boot 个人博客系统
+﻿# my-blog · Spring Boot 个人博客系统
 
 一个用 Spring Boot + Thymeleaf 搭建的个人博客：前台可以浏览文章列表与详情，后台可以发布、编辑、删除文章（按需求**暂不做登录验证**）。数据默认存放在本地 H2 文件数据库，也可切换到 MySQL。
 
@@ -17,7 +17,7 @@
 | 后台写作 | 新建 / 编辑文章表单（标题、摘要、正文、分类、标签、作者、是否发布） |
 | 后台删除 | POST 删除并二次确认，操作结果以 Flash 消息提示 |
 | **评论** | 登录后可评论（未登录显示登录提示），评论存 MySQL；管理员可在评论区直接删除，删文章时评论级联清理 |
-| **更换壁纸** | 后台 `/admin/settings` 上传壁纸（jpg/png/gif/webp，≤5MB），全站背景立即生效，可一键恢复默认 |
+| **更换壁纸** | 后台 `/admin/settings` 上传壁纸（jpg/png/gif/webp，≤40MB），全站背景立即生效，可一键恢复默认 |
 | 其他 | 表单校验（`@Valid` + 错误回显）、全局异常处理（404 / 500 友好页面）、首次启动写入演示数据 |
 
 > 默认管理员账号：**`admin` / `admin123`**（写在 `SecurityConfig` 里，换成数据库用户只需要替换一个 Bean）。
@@ -30,7 +30,7 @@
 - **构建**：Maven 3.9（`spring-boot-maven-plugin`）
 - **前端**：手写 CSS（卡片式博客主题、响应式、`/theme.css` 动态生成壁纸样式），无前端构建步骤
 - **JDK**：Java 17
-- **测试**：JUnit 5 + AssertJ + `@DataJpaTest`（14 个用例）
+- **测试**：JUnit 5 + AssertJ + Mockito（18 个用例）
 
 ## 目录结构
 
@@ -123,7 +123,7 @@ H2 控制台：<http://localhost:8080/h2-console>（JDBC URL `jdbc:h2:file:./dat
 mvn test
 ```
 
-单元测试用 `@DataJpaTest` + 内嵌 H2，**不依赖本机 MySQL**，共 14 个用例。
+单元测试用 `@DataJpaTest` + 内嵌 H2，**不依赖本机 MySQL**，共 18 个用例。
 
 ## 页面与路由
 

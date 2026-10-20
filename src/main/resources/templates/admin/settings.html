@@ -15,6 +15,9 @@
 
     <div class="alert" th:if="${message}" th:text="${message}">操作成功</div>
     <div class="alert alert-error" th:if="${errorMessage}" th:text="${errorMessage}">操作失败</div>
+    <!-- 文件太大时由 GlobalExceptionHandler 重定向回本页，带 tooLarge=1 -->
+    <div class="alert alert-error" th:if="${param.tooLarge != null}"
+         th:text="'图片太大了，不能超过 ' + ${maxUploadSize} + '，可以先压缩一下再上传'">图片太大了</div>
 
     <!-- 当前壁纸预览 -->
     <div class="card">
@@ -38,7 +41,8 @@
 
         <h4 class="card-title">更换壁纸</h4>
         <div class="field">
-            <label for="file">选择图片（jpg / png / gif / webp，不超过 5MB）</label>
+            <label for="file"
+                   th:text="'选择图片（jpg / png / gif / webp，不超过 ' + ${maxUploadSize} + '）'">选择图片（不超过 40MB）</label>
             <input type="file" id="file" name="file" accept="image/*" required>
         </div>
         <div class="form-actions">
