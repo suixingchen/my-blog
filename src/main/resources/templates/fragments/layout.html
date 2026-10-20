@@ -9,15 +9,20 @@
     <!-- 动态样式表：内容由 ThemeCssController 生成，里面带着管理员设置的壁纸路径 -->
     <link rel="stylesheet" th:href="@{/theme.css}">
 
-    <!-- 这段必须放在 CSS 之后、页面渲染之前：先把"上次选的卡片配色"贴到 <html> 上，
+    <!-- 这段必须放在 CSS 之后、页面渲染之前：把"上次选的阅读设置"先贴到 <html> 上，
          否则会先白一下再变色（闪屏）。只有 JS 可用时才给 html 加 .js，
          这样脚本被禁用时文章列表也不会因为 .reveal 而整片空白。 -->
     <script>
         document.documentElement.classList.add('js');
         try {
             var savedCard = localStorage.getItem('blog.cardTheme');
-            if (savedCard) {
-                document.documentElement.setAttribute('data-card', savedCard);
+            if (savedCard) { document.documentElement.setAttribute('data-card', savedCard); }
+            var savedFont = localStorage.getItem('blog.fontSize');
+            if (savedFont) { document.documentElement.setAttribute('data-font', savedFont); }
+            var savedLeading = localStorage.getItem('blog.lineHeight');
+            if (savedLeading) { document.documentElement.setAttribute('data-leading', savedLeading); }
+            if (localStorage.getItem('blog.immersive') === 'on') {
+                document.documentElement.setAttribute('data-immersive', 'on');
             }
         } catch (e) {
             /* 隐私模式下 localStorage 可能不可用，忽略即可 */
@@ -49,6 +54,13 @@
             </span>
             <!-- 未登录：显示登录入口 -->
             <a sec:authorize="!isAuthenticated()" th:href="@{/login}">登录</a>
+
+            <!-- 沉浸模式下侧边栏收起了，这里是唯一的出口。
+                 特意放在导航里而不是 position:fixed：
+                 页头有 backdrop-filter，会把 fixed 子元素变成"相对页头定位"，反而跑位。 -->
+            <button type="button" class="the-immersive-exit" id="immersiveExit" aria-label="退出沉浸模式">
+                退出沉浸 ✕
+            </button>
         </nav>
     </div>
 </header>
@@ -60,11 +72,12 @@
         <p th:text="${blogSubtitle}">记录学习与生活的角落</p>
     </div>
 
-    <!-- 外观：切换卡片配色，让文章卡片和壁纸更搭。
-         点一下由 /js/reading.js 处理：改 <html data-card> + 存 localStorage。 -->
+    <!-- 外观：配色 / 字号 / 行距 / 沉浸模式。
+         全部由 /js/reading.js 处理：改 <html> 上的 data-* 属性 + 存 localStorage。 -->
     <div class="card" id="appearance">
         <h4 class="card-title">外观</h4>
-        <p class="theme-tip">选一个和壁纸相配的配色（会记住）</p>
+
+        <p class="opt-label">卡片配色</p>
         <div class="theme-swatches" role="group" aria-label="卡片配色">
             <button class="swatch" type="button" data-card-set="snow" aria-pressed="false">
                 <span class="chip"></span>
@@ -78,7 +91,36 @@
                 <span class="chip"></span>
                 <span class="name">雾松</span>
             </button>
+            <button class="swatch" type="button" data-card-set="ink" aria-pressed="false">
+                <span class="chip"></span>
+                <span class="name">夜墨</span>
+            </button>
         </div>
+
+        <div class="opt-row">
+            <span class="opt-label">正文字号</span>
+            <div class="opt-group" role="group" aria-label="正文字号">
+                <button class="opt-btn" type="button" data-font-set="sm" aria-pressed="false">小</button>
+                <button class="opt-btn" type="button" data-font-set="md" aria-pressed="false">中</button>
+                <button class="opt-btn" type="button" data-font-set="lg" aria-pressed="false">大</button>
+            </div>
+        </div>
+
+        <div class="opt-row">
+            <span class="opt-label">行距</span>
+            <div class="opt-group" role="group" aria-label="行距">
+                <button class="opt-btn" type="button" data-leading-set="normal" aria-pressed="false">标准</button>
+                <button class="opt-btn" type="button" data-leading-set="loose" aria-pressed="false">宽松</button>
+            </div>
+        </div>
+
+        <div class="opt-row">
+            <button class="opt-btn wide" type="button" data-immersive-toggle aria-pressed="false">
+                沉浸模式（收起侧边栏）
+            </button>
+        </div>
+
+        <p class="theme-tip">选择和阅读设置会记在这台设备上。</p>
     </div>
 
     <div class="card">
