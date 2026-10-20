@@ -44,7 +44,7 @@ spring:
 blog:
   title: Stellara的个人博客
   subtitle: 记录学习与生活的角落
-  author: suixingchen
+  author: Stellara
   # 前台与后台列表每页条数
   page-size: 5
   # 壁纸文件存放目录（相对项目根目录）

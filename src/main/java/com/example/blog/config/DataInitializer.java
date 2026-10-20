@@ -50,7 +50,7 @@ public class DataInitializer implements CommandLineRunner {
                         先把首页用假数据渲染出来，确认 Thymeleaf 模板、静态资源路径都没问题，
                         之后再接数据库，这样一旦出错就能快速定位是模板问题还是数据问题。
                         """,
-                        "后端", "Spring Boot,Thymeleaf,分层设计", "suixingchen"),
+                        "后端", "Spring Boot,Thymeleaf,分层设计", "Stellara"),
                 new Article(
                         "JPA 实体设计：一篇文章需要哪些字段",
                         "标题、摘要、正文、分类、标签、阅读量、发布状态与时间戳，逐个说明设计取舍。",
@@ -69,7 +69,7 @@ public class DataInitializer implements CommandLineRunner {
                         时间戳交给实体生命周期回调，而不是在每个 Service 方法里手写，
                         这样即使以后有别的入口写入数据，时间也不会漏掉。
                         """,
-                        "后端", "JPA,Hibernate,实体设计", "suixingchen"),
+                        "后端", "JPA,Hibernate,实体设计", "Stellara"),
                 new Article(
                         "Thymeleaf 模板复用：把页面拆成片段",
                         "用 th:fragment 抽出页头、页脚与侧边栏，避免每个页面都复制一遍结构。",
@@ -84,7 +84,7 @@ public class DataInitializer implements CommandLineRunner {
                         页面里用 th:replace="~{fragments/layout :: header}" 引入即可。
                         需要传参的地方（比如 head 的标题）用片段参数，写法是 ~{... :: head('首页')}。
                         """,
-                        "前端", "Thymeleaf,模板", "suixingchen"),
+                        "前端", "Thymeleaf,模板", "Stellara"),
                 new Article(
                         "后台管理页面的最小可用做法",
                         "不做登录的前提下，后台只需要列表、表单、删除三个动作，先把流程跑顺。",
@@ -98,7 +98,7 @@ public class DataInitializer implements CommandLineRunner {
 
                         删除用 POST 而不是 GET 链接，避免浏览器预取或爬虫误删数据。
                         """,
-                        "后端", "后台管理,CRUD", "suixingchen"),
+                        "后端", "后台管理,CRUD", "Stellara"),
                 new Article(
                         "本地开发环境搭建记录（JDK 与 Maven）",
                         "记录 JDK 17 与 Maven 的便携式安装方式，不改系统环境变量也能跑起来。",
@@ -112,7 +112,7 @@ public class DataInitializer implements CommandLineRunner {
 
                         验证方式：java -version 与 mvn -v 都能正常输出即可。
                         """,
-                        "工具", "环境搭建,Maven,JDK", "suixingchen"),
+                        "工具", "环境搭建,Maven,JDK", "Stellara"),
                 new Article(
                         "写博客这件事，先跑起来再说",
                         "关于为什么先做一个功能最少但能用的版本，而不是一开始就追求完整。",
@@ -126,7 +126,7 @@ public class DataInitializer implements CommandLineRunner {
 
                         每一步都是可以运行、可以提交的状态，进度看得见，也就更容易坚持下去。
                         """,
-                        "随笔", "随笔,方法论", "suixingchen")
+                        "随笔", "随笔,方法论", "Stellara")
         );
     }
 }

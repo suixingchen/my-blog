@@ -116,7 +116,7 @@ class ArticleServiceTest {
         ArticleForm form = new ArticleForm();
         form.setTitle(title);
         form.setContent(content);
-        form.setAuthor("suixingchen");
+        form.setAuthor("Stellara");
         return form;
     }
 
