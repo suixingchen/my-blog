@@ -1,4 +1,4 @@
-target/
+﻿target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
@@ -31,3 +31,6 @@ uploads/
 *.class
 *.jar
 !.mvn/wrapper/maven-wrapper.jar
+
+### 本地截图（验证用，不进仓库）
+.shots/

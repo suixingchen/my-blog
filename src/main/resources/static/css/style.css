@@ -10,10 +10,44 @@
     --border: #e6e9ef;
     --radius: 12px;
     --shadow: 0 1px 2px rgba(16, 24, 40, .04), 0 4px 16px rgba(16, 24, 40, .05);
+
+    /* ---- 壁纸适配：卡片配色（由侧边栏"外观"切换，JS 写在 <html data-card="..."> 上）----
+       默认 snow 雪白：半透明白到极浅蓝的渐变，壁纸能透出来但文字依然清楚。
+       半透明 + backdrop-filter 模糊 = 毛玻璃效果。 */
+    --card-bg: linear-gradient(150deg, rgba(255, 255, 255, .94), rgba(222, 235, 255, .80));
+    --card-border: rgba(255, 255, 255, .70);
+    --card-blur: 14px;
+    --card-shadow: 0 6px 22px rgba(16, 24, 40, .10);
+    --chip-bg: rgba(255, 255, 255, .62);
+    --header-bg: rgba(255, 255, 255, .82);
+    --hero-text: #ffffff;
+    /* 两层阴影：近处勾边 + 远处扩散，浅色壁纸上白字也能立住 */
+    --hero-shadow: 0 1px 3px rgba(8, 14, 30, .55), 0 3px 26px rgba(8, 14, 30, .55);
+}
+
+/* 暖砂：米黄到浅杏的渐变，适合暖色调壁纸 */
+html[data-card="sand"] {
+    --card-bg: linear-gradient(150deg, rgba(255, 250, 242, .94), rgba(255, 209, 160, .82));
+    --card-border: rgba(255, 236, 214, .85);
+    --chip-bg: rgba(255, 249, 240, .70);
+    --header-bg: rgba(255, 250, 243, .84);
+}
+
+/* 雾松：浅青到浅蓝的渐变，适合冷色调 / 风景壁纸 */
+html[data-card="pine"] {
+    --card-bg: linear-gradient(150deg, rgba(240, 252, 248, .94), rgba(190, 226, 246, .82));
+    --card-border: rgba(206, 236, 238, .85);
+    --chip-bg: rgba(240, 252, 250, .70);
+    --header-bg: rgba(244, 252, 250, .84);
 }
 
 * {
     box-sizing: border-box;
+}
+
+/* 点"向下滑动"时是平滑滚动过去，而不是瞬间跳 */
+html {
+    scroll-behavior: smooth;
 }
 
 body {
@@ -56,9 +90,9 @@ a:hover {
 
 /* ===== 页头 ===== */
 .site-header {
-    background: rgba(255, 255, 255, .92);
-    backdrop-filter: blur(8px);
-    border-bottom: 1px solid var(--border);
+    background: var(--header-bg);
+    backdrop-filter: blur(10px) saturate(140%);
+    border-bottom: 1px solid var(--card-border);
     position: sticky;
     top: 0;
     z-index: 10;
@@ -137,11 +171,15 @@ a:hover {
 }
 
 /* ===== 卡片 ===== */
+/* 卡片一律用这三行实现"毛玻璃"：半透明渐变背景 + 背景模糊 + 淡边框。
+   颜色由 --card-bg 控制，切换配色时只换变量，卡片本身不用改。 */
 .card {
-    background: var(--card);
-    border: 1px solid var(--border);
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
     border-radius: var(--radius);
-    box-shadow: var(--shadow);
+    box-shadow: var(--card-shadow);
+    backdrop-filter: blur(var(--card-blur)) saturate(140%);
+    -webkit-backdrop-filter: blur(var(--card-blur)) saturate(140%);
     padding: 20px 22px;
     margin-bottom: 18px;
 }
@@ -153,18 +191,20 @@ a:hover {
 }
 
 .post-card {
-    background: var(--card);
-    border: 1px solid var(--border);
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
     border-radius: var(--radius);
-    box-shadow: var(--shadow);
+    box-shadow: var(--card-shadow);
+    backdrop-filter: blur(var(--card-blur)) saturate(140%);
+    -webkit-backdrop-filter: blur(var(--card-blur)) saturate(140%);
     padding: 22px 24px;
     margin-bottom: 18px;
-    transition: transform .16s ease, box-shadow .16s ease;
+    transition: transform .18s ease, box-shadow .18s ease;
 }
 
 .post-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(16, 24, 40, .09);
+    transform: translateY(-3px);
+    box-shadow: 0 12px 30px rgba(16, 24, 40, .14);
 }
 
 .post-title {
@@ -220,9 +260,9 @@ a:hover {
 .tag {
     display: inline-block;
     padding: 2px 10px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--card-border);
     border-radius: 999px;
-    background: #fafbfd;
+    background: var(--chip-bg);
     color: var(--muted);
     font-size: 12px;
 }
@@ -293,7 +333,10 @@ a:hover {
     white-space: pre-wrap;
     word-break: break-word;
     color: #2b3038;
-    font-size: 15.5px;
+    font-size: 16.5px;
+    line-height: 1.95;        /* 行距放宽，长文更好读 */
+    letter-spacing: .01em;
+    max-width: 68ch;          /* 一行别太长，眼睛不容易跳行 */
 }
 
 .article-foot {
@@ -659,7 +702,7 @@ textarea {
 }
 
 .category-list .count {
-    color: var(--muted);
+    color: #6b7785;
     font-size: 12px;
 }
 
@@ -804,6 +847,294 @@ textarea {
     background-size: cover;
     background-position: center;
     margin-top: 10px;
+}
+
+/* ==================================================================
+   首页首屏：只显示壁纸，下滑才看到文章
+   ================================================================== */
+.hero-full {
+    position: relative;
+    min-height: calc(100vh - 62px);
+    min-height: calc(100svh - 62px);   /* 手机地址栏收起时不跳动 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 40px 24px 64px;
+}
+
+/* 很淡的暗角：让白字在任何壁纸（哪怕是白云）上都看得清，但壁纸细节还在。
+   注意只有"设置了壁纸"时才启用，否则浅色默认背景上白字会看不见。 */
+body.has-wallpaper .hero-full::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(120% 90% at 50% 40%,
+                rgba(8, 15, 30, 0) 35%, rgba(8, 15, 30, .40) 100%);
+    pointer-events: none;
+}
+
+.hero-inner {
+    position: relative;
+    max-width: 760px;
+}
+
+.hero-eyebrow {
+    margin: 0 0 14px;
+    color: var(--muted);
+    font-size: 12px;
+    letter-spacing: .34em;
+    text-transform: uppercase;
+}
+
+.hero-inner h1 {
+    margin: 0 0 14px;
+    font-size: clamp(30px, 6vw, 56px);
+    line-height: 1.18;
+    letter-spacing: -.5px;
+    color: var(--text);
+}
+
+.hero-inner p {
+    margin: 0 auto;
+    max-width: 620px;
+    color: var(--muted);
+    font-size: clamp(14px, 2.2vw, 17px);
+}
+
+/* 有壁纸时文字转白 + 阴影 */
+body.has-wallpaper .hero-eyebrow {
+    color: rgba(255, 255, 255, .88);
+    text-shadow: 0 1px 10px rgba(12, 20, 40, .5);
+}
+
+body.has-wallpaper .hero-inner h1 {
+    color: var(--hero-text);
+    text-shadow: var(--hero-shadow);
+}
+
+body.has-wallpaper .hero-inner p {
+    color: rgba(255, 255, 255, .94);
+    text-shadow: 0 1px 3px rgba(8, 14, 30, .5), 0 2px 16px rgba(8, 14, 30, .5);
+}
+
+/* 下滑提示：会轻轻呼吸的箭头 */
+.scroll-cue {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    margin-top: 40px;
+    font-size: 13px;
+    color: var(--muted);
+}
+
+body.has-wallpaper .scroll-cue {
+    color: rgba(255, 255, 255, .95);
+    text-shadow: 0 1px 10px rgba(12, 20, 40, .5);
+}
+
+.scroll-cue:hover {
+    color: var(--accent);
+}
+
+body.has-wallpaper .scroll-cue:hover {
+    color: #fff;
+}
+
+.scroll-cue .arrow {
+    width: 24px;
+    height: 24px;
+    border-right: 2px solid currentColor;
+    border-bottom: 2px solid currentColor;
+    border-radius: 2px;
+    transform: rotate(45deg);
+    animation: cue-bounce 1.8s ease-in-out infinite;
+}
+
+@keyframes cue-bounce {
+    0%, 100% { transform: rotate(45deg) translate(0, 0); opacity: .5; }
+    50%      { transform: rotate(45deg) translate(5px, 5px); opacity: 1; }
+}
+
+/* 文章区滚动进入时淡入上浮。
+   注意：只有 JS 正常跑起来（<html class="js">）才隐藏，避免脚本失效时整片空白。 */
+.js .reveal {
+    opacity: 0;
+    translate: 0 18px;
+    transition: opacity .6s ease, translate .6s ease;
+}
+
+.js .reveal.is-visible {
+    opacity: 1;
+    translate: 0 0;
+}
+
+/* ==================================================================
+   侧边栏「外观」：三套卡片配色可选
+   ================================================================== */
+.theme-swatches {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.swatch {
+    width: 58px;
+    padding: 0;
+    border: 2px solid transparent;
+    border-radius: 10px;
+    background: none;
+    cursor: pointer;
+    font: inherit;
+    text-align: center;
+}
+
+.swatch .chip {
+    display: block;
+    height: 34px;
+    border-radius: 8px;
+    border: 1px solid rgba(16, 24, 40, .12);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .55);
+}
+
+.swatch .name {
+    display: block;
+    margin-top: 5px;
+    color: var(--muted);
+    font-size: 11.5px;
+}
+
+.swatch[aria-pressed="true"] {
+    border-color: var(--accent);
+}
+
+.swatch[aria-pressed="true"] .name {
+    color: var(--accent);
+    font-weight: 700;
+}
+
+.swatch:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+/* 三块色板（比真实卡片饱和一点，方便一眼看出区别） */
+.swatch[data-card-set="snow"] .chip {
+    background: linear-gradient(150deg, #ffffff, #cfe0ff);
+}
+
+.swatch[data-card-set="sand"] .chip {
+    background: linear-gradient(150deg, #fff7ea, #ffcf9e);
+}
+
+.swatch[data-card-set="pine"] .chip {
+    background: linear-gradient(150deg, #eafaf4, #b6dcf5);
+}
+
+.theme-tip {
+    margin: 10px 0 0;
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+/* ==================================================================
+   兼容性 + 手机端
+   ================================================================== */
+/* 老浏览器不支持毛玻璃：把卡片调实一点，至少不影响阅读 */
+@supports not ((backdrop-filter: blur(4px)) or (-webkit-backdrop-filter: blur(4px))) {
+    .card, .post-card {
+        background: rgba(255, 255, 255, .96);
+    }
+
+    html[data-card="sand"] .card, html[data-card="sand"] .post-card {
+        background: #fff8ee;
+    }
+
+    html[data-card="pine"] .card, html[data-card="pine"] .post-card {
+        background: #f2fbf8;
+    }
+}
+
+/* 系统开了"减少动态效果"就把动画关掉（无障碍） */
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto;
+    }
+
+    .js .reveal {
+        opacity: 1;
+        translate: none;
+        transition: none;
+    }
+
+    .scroll-cue .arrow {
+        animation: none;
+    }
+
+    .post-card {
+        transition: none;
+    }
+}
+
+@media (max-width: 860px) {
+    .hero-full {
+        min-height: calc(100svh - 56px);
+        padding: 28px 18px 52px;
+    }
+
+    .scroll-cue {
+        margin-top: 26px;
+    }
+
+    .article-content {
+        font-size: 16px;
+        line-height: 1.9;
+    }
+
+    .theme-swatches {
+        gap: 8px;
+    }
+
+    .swatch {
+        width: 52px;
+    }
+}
+
+/* 手机窄屏：导航别挤出屏幕（首页/后台管理/登录三个链接要放得下） */
+@media (max-width: 600px) {
+    .header-inner {
+        height: 56px;
+        gap: 10px;
+    }
+
+    /* 品牌名太长时省略号截断，绝不能把右边的导航挤出去 */
+    .brand {
+        min-width: 0;
+        max-width: 46vw;
+        overflow: hidden;
+        font-size: 15px;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    }
+
+    .nav {
+        display: flex;
+        flex-shrink: 0;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .nav a {
+        margin-left: 0;
+        font-size: 13px;
+    }
+
+    .nav-user {
+        margin-left: 0;
+        font-size: 12px;
+    }
 }
 
 

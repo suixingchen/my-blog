@@ -37,14 +37,18 @@ public class ThemeCssController {
             return "/* 使用默认背景 */\n";
         }
 
-        return "body{"
+        // 壁纸不直接画在 body 上，而是画在一个固定定位的 ::before 图层上：
+        //   ① 用 background-attachment: fixed 在 iOS Safari 上会失效/抖动，改成固定图层更稳；
+        //   ② z-index: -1 让它躺在所有内容底下，卡片半透明就能透出壁纸；
+        //   ③ 滚动时壁纸不动，长页面也有"沉浸"感。
+        return "body::before{content:'';position:fixed;inset:0;z-index:-1;"
                 + "background-image:url('" + bgImage + "');"
                 + "background-size:cover;"
                 + "background-position:center;"
-                + "background-attachment:fixed;"
+                + "background-repeat:no-repeat;"
                 + "}"
-                // 壁纸之上把卡片调成半透明，保证正文清晰可读
-                + ".card,.post-card,.site-header,.site-footer{background:rgba(255,255,255,.93)}"
+                // 卡片的颜色/透明度不在这里决定：
+                // 交给 style.css 的 --card-bg 变量，用户在侧边栏"外观"里能自己选配色。
                 + "\n";
     }
 }

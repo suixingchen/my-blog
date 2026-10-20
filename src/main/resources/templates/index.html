@@ -1,17 +1,29 @@
 <!DOCTYPE html>
 <html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/layout :: head('首页')}"></head>
-<body>
+<body th:classappend="${bgImage != null} ? 'has-wallpaper' : ''">
 <header th:replace="~{fragments/layout :: header}"></header>
 
-<main class="container layout">
-    <div class="main-col">
-        <section class="hero">
-            <h1 th:text="${blogTitle}">我的个人博客</h1>
-            <p th:text="${blogSubtitle}">记录学习与生活的角落</p>
-        </section>
+<!-- ===== 首屏：只显示壁纸 =====
+     背景图是 /theme.css 给 body 设的，所以这一屏除了站名和一句下滑提示什么都不放，
+     让壁纸完整露出来。"has-wallpaper"这个 class 只在设置了壁纸时才加，
+     因为白字放在浅色默认背景上会看不见，那时改用深色文字。 -->
+<section class="hero-full">
+    <div class="hero-inner">
+        <p class="hero-eyebrow">Welcome</p>
+        <h1 th:text="${blogTitle}">我的个人博客</h1>
+        <p th:text="${blogSubtitle}">记录学习与生活的角落</p>
+        <a class="scroll-cue" href="#posts">
+            <span>向下滑动 · 看文章</span>
+            <span class="arrow" aria-hidden="true"></span>
+        </a>
+    </div>
+</section>
 
-        <form class="search-bar" th:action="@{/}" method="get">
+<!-- ===== 第二屏起：文章列表 ===== -->
+<main class="container layout" id="posts">
+    <div class="main-col">
+        <form class="search-bar reveal" th:action="@{/}" method="get">
             <input type="text" name="keyword" th:value="${keyword}" placeholder="搜索标题或标签…">
             <input type="hidden" name="category" th:value="${currentCategory}" th:if="${currentCategory != null}">
             <button type="submit" class="btn btn-primary">搜索</button>
@@ -26,7 +38,7 @@
             <span th:if="${currentCategory != null}">，分类「<strong th:text="${currentCategory}"></strong>」</span>
         </p>
 
-        <section class="post-list">
+        <section class="post-list reveal">
             <article class="post-card" th:each="post : ${posts}">
                 <h2 class="post-title">
                     <a th:href="@{/article/{id}(id=${post.id})}" th:text="${post.title}">文章标题</a>

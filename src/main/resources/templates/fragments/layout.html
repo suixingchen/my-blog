@@ -8,6 +8,22 @@
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <!-- 动态样式表：内容由 ThemeCssController 生成，里面带着管理员设置的壁纸路径 -->
     <link rel="stylesheet" th:href="@{/theme.css}">
+
+    <!-- 这段必须放在 CSS 之后、页面渲染之前：先把"上次选的卡片配色"贴到 <html> 上，
+         否则会先白一下再变色（闪屏）。只有 JS 可用时才给 html 加 .js，
+         这样脚本被禁用时文章列表也不会因为 .reveal 而整片空白。 -->
+    <script>
+        document.documentElement.classList.add('js');
+        try {
+            var savedCard = localStorage.getItem('blog.cardTheme');
+            if (savedCard) {
+                document.documentElement.setAttribute('data-card', savedCard);
+            }
+        } catch (e) {
+            /* 隐私模式下 localStorage 可能不可用，忽略即可 */
+        }
+    </script>
+    <script defer th:src="@{/js/reading.js}"></script>
 </head>
 <body>
 
@@ -42,6 +58,27 @@
         <div class="avatar" th:text="${#strings.substring(blogAuthor, 0, 1)}">博</div>
         <h3 th:text="${blogAuthor}">博主</h3>
         <p th:text="${blogSubtitle}">记录学习与生活的角落</p>
+    </div>
+
+    <!-- 外观：切换卡片配色，让文章卡片和壁纸更搭。
+         点一下由 /js/reading.js 处理：改 <html data-card> + 存 localStorage。 -->
+    <div class="card" id="appearance">
+        <h4 class="card-title">外观</h4>
+        <p class="theme-tip">选一个和壁纸相配的配色（会记住）</p>
+        <div class="theme-swatches" role="group" aria-label="卡片配色">
+            <button class="swatch" type="button" data-card-set="snow" aria-pressed="false">
+                <span class="chip"></span>
+                <span class="name">雪白</span>
+            </button>
+            <button class="swatch" type="button" data-card-set="sand" aria-pressed="false">
+                <span class="chip"></span>
+                <span class="name">暖砂</span>
+            </button>
+            <button class="swatch" type="button" data-card-set="pine" aria-pressed="false">
+                <span class="chip"></span>
+                <span class="name">雾松</span>
+            </button>
+        </div>
     </div>
 
     <div class="card">
