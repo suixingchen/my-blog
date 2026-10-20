@@ -39,6 +39,21 @@ public class AdminSettingController {
         return "admin/settings";
     }
 
+    /**
+     * 修改站点名称（站名 / 作者名）。
+     *
+     * <p>只影响站点的显示（首页大标题、导航、浏览器标签、侧边栏、页脚），
+     * 不会去改动 article 表里已经写好的作者字段。留空保存 = 恢复配置文件里的默认值。</p>
+     */
+    @PostMapping("/names")
+    public String updateNames(@RequestParam(value = "siteTitle", required = false) String siteTitle,
+                              @RequestParam(value = "siteAuthor", required = false) String siteAuthor,
+                              RedirectAttributes redirectAttributes) {
+        siteSettingService.updateNames(siteTitle, siteAuthor);
+        redirectAttributes.addFlashAttribute("message", "站点名称已更新，首页已同步（文章里的作者字段未改动）");
+        return "redirect:/admin/settings";
+    }
+
     /** 上传新壁纸 */
     @PostMapping("/background")
     public String uploadBackground(@RequestParam("file") MultipartFile file,

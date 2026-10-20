@@ -20,14 +20,8 @@ public class GlobalModelAdvice {
     private final ArticleService articleService;
     private final SiteSettingService siteSettingService;
 
-    @Value("${blog.title}")
-    private String blogTitle;
-
     @Value("${blog.subtitle}")
     private String blogSubtitle;
-
-    @Value("${blog.author}")
-    private String blogAuthor;
 
     public GlobalModelAdvice(ArticleService articleService, SiteSettingService siteSettingService) {
         this.articleService = articleService;
@@ -36,9 +30,10 @@ public class GlobalModelAdvice {
 
     @ModelAttribute
     public void commonAttributes(Model model) {
-        model.addAttribute("blogTitle", blogTitle);
+        // 站名和作者名优先取数据库里的（后台能改名），没设置过就用 application.yml 的默认值
+        model.addAttribute("blogTitle", siteSettingService.getSiteTitle());
+        model.addAttribute("blogAuthor", siteSettingService.getSiteAuthor());
         model.addAttribute("blogSubtitle", blogSubtitle);
-        model.addAttribute("blogAuthor", blogAuthor);
         model.addAttribute("categoryCounts", articleService.categoryCounts());
         // 管理员在后台设置的壁纸路径；没设置就是 null，模板里会走默认背景
         model.addAttribute("bgImage", siteSettingService.getBackgroundUrl());

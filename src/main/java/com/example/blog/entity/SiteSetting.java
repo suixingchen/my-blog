@@ -31,6 +31,19 @@ public class SiteSetting {
     @Column(name = "bg_image", length = 255)
     private String bgImage;
 
+    /**
+     * 站名：首页大标题、导航栏、浏览器标签都显示它。null 表示沿用 application.yml 的默认值。
+     *
+     * <p>注意：它只影响"站点怎么显示自己"，<b>不会</b>去改 article 表里的 author 字段——
+     * 文章的作者是写作时确定的业务数据，不该因为改了站名就被批量覆盖。</p>
+     */
+    @Column(name = "site_title", length = 100)
+    private String siteTitle;
+
+    /** 作者名：侧边栏作者卡、页脚显示它。null 表示沿用配置文件默认值 */
+    @Column(name = "site_author", length = 100)
+    private String siteAuthor;
+
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
@@ -48,6 +61,22 @@ public class SiteSetting {
 
     public void setBgImage(String bgImage) {
         this.bgImage = bgImage;
+    }
+
+    public String getSiteTitle() {
+        return siteTitle;
+    }
+
+    public void setSiteTitle(String siteTitle) {
+        this.siteTitle = siteTitle;
+    }
+
+    public String getSiteAuthor() {
+        return siteAuthor;
+    }
+
+    public void setSiteAuthor(String siteAuthor) {
+        this.siteAuthor = siteAuthor;
     }
 
     public LocalDateTime getUpdatedAt() {

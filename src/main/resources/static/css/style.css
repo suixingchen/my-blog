@@ -526,7 +526,15 @@ a:hover {
     align-items: flex-end;
     justify-content: space-between;
     gap: 16px;
-    padding: 30px 0 18px;
+    margin: 24px 0 18px;
+    padding: 16px 20px;
+    /* 后台页面的标题也坐到毛玻璃卡上——不然深色/复杂壁纸下白底文字看不清 */
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    box-shadow: var(--card-shadow);
+    backdrop-filter: blur(var(--card-blur)) saturate(140%);
+    -webkit-backdrop-filter: blur(var(--card-blur)) saturate(140%);
 }
 
 .page-head h1 {
@@ -636,6 +644,13 @@ a:hover {
 /* ===== 表单 ===== */
 .form-card {
     padding: 24px 26px;
+}
+
+/* 表单里的小段说明文字（比如"留空 = 恢复默认"） */
+.form-note {
+    margin: 0 0 18px;
+    font-size: 13px;
+    line-height: 1.7;
 }
 
 .field {

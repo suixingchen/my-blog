@@ -43,7 +43,7 @@ class SiteSettingServiceTest {
     }
 
     private SiteSettingService serviceWithLimit(String limit) {
-        return new SiteSettingService(fakeRepository(), limit);
+        return new SiteSettingService(fakeRepository(), limit, "默认站名", "默认作者");
     }
 
     @Test
@@ -106,5 +106,48 @@ class SiteSettingServiceTest {
         assertThat(first).isNotEqualTo(second);
         assertThat(Files.exists(first)).isFalse();     // 旧的删了
         assertThat(Files.exists(second)).isTrue();     // 新的在
+    }
+
+    @Test
+    @DisplayName("没改过名字时，站名/作者名用配置文件里的默认值")
+    void namesFallBackToConfiguredDefaults() {
+        SiteSettingService service = serviceWithLimit("40MB");
+
+        assertThat(service.getSiteTitle()).isEqualTo("默认站名");
+        assertThat(service.getSiteAuthor()).isEqualTo("默认作者");
+    }
+
+    @Test
+    @DisplayName("改名后立刻生效，并且会去掉首尾空格")
+    void updateNamesTrimsAndTakesEffect() {
+        SiteSettingService service = serviceWithLimit("40MB");
+
+        service.updateNames("  Stellara的个人博客  ", " Stellara ");
+
+        assertThat(service.getSiteTitle()).isEqualTo("Stellara的个人博客");
+        assertThat(service.getSiteAuthor()).isEqualTo("Stellara");
+    }
+
+    @Test
+    @DisplayName("留空保存 = 恢复配置文件里的默认值")
+    void blankNamesFallBackToDefaults() {
+        SiteSettingService service = serviceWithLimit("40MB");
+        service.updateNames("临时站名", "临时作者");
+
+        service.updateNames("   ", "");
+
+        assertThat(service.getSiteTitle()).isEqualTo("默认站名");
+        assertThat(service.getSiteAuthor()).isEqualTo("默认作者");
+    }
+
+    @Test
+    @DisplayName("名字太长会被截断到 40 个字符，不会把页面撑坏")
+    void tooLongNameIsTruncated() {
+        SiteSettingService service = serviceWithLimit("40MB");
+        String tooLong = "长".repeat(60);
+
+        service.updateNames(tooLong, "作者");
+
+        assertThat(service.getSiteTitle()).hasSize(40);
     }
 }

@@ -30,6 +30,8 @@ public class SiteSettingService {
     private static final List<String> ALLOWED_EXT = List.of("jpg", "jpeg", "png", "gif", "webp");
     /** 壁纸在网页上的访问前缀，对应 WebMvcConfig 里的静态资源映射 */
     private static final String WEB_PREFIX = "/uploads/";
+    /** 站名/作者名最长长度（和页面输入框的 maxlength 保持一致） */
+    private static final int MAX_NAME_LENGTH = 40;
 
     private final SiteSettingRepository siteSettingRepository;
 
@@ -38,12 +40,20 @@ public class SiteSettingService {
     /** 上限的可读形式，如 "40MB"，用来拼提示语和页面上显示 */
     private final String maxSizeLabel;
 
+    /** 配置文件里的默认站名 / 作者名：数据库里没设置时就用它们 */
+    private final String defaultSiteTitle;
+    private final String defaultSiteAuthor;
+
     public SiteSettingService(SiteSettingRepository siteSettingRepository,
-                              @Value("${spring.servlet.multipart.max-file-size:40MB}") String maxFileSize) {
+                              @Value("${spring.servlet.multipart.max-file-size:40MB}") String maxFileSize,
+                              @Value("${blog.title:我的个人博客}") String defaultSiteTitle,
+                              @Value("${blog.author:匿名}") String defaultSiteAuthor) {
         this.siteSettingRepository = siteSettingRepository;
         DataSize limit = DataSize.parse(maxFileSize);   // "40MB" -> 41943040 字节
         this.maxSize = limit.toBytes();
         this.maxSizeLabel = formatSize(limit);
+        this.defaultSiteTitle = defaultSiteTitle;
+        this.defaultSiteAuthor = defaultSiteAuthor;
     }
 
     /** 把 DataSize 变成人看的大小：41943040 -> "40MB"，2048 -> "2KB" */
@@ -69,6 +79,57 @@ public class SiteSettingService {
         return siteSettingRepository.findById(SiteSetting.SINGLETON_ID)
                 .map(SiteSetting::getBgImage)
                 .orElse(null);
+    }
+
+    /**
+     * 当前站名：数据库里设置过就用数据库的，否则回落到 application.yml 的 blog.title。
+     *
+     * <p>这个"数据库优先、配置兜底"的写法就是配置项常见的分层：
+     * 装好就能跑（配置有默认值），想改又不必重启（数据库优先）。</p>
+     */
+    @Transactional(readOnly = true)
+    public String getSiteTitle() {
+        return siteSettingRepository.findById(SiteSetting.SINGLETON_ID)
+                .map(SiteSetting::getSiteTitle)
+                .filter(value -> value != null && !value.isBlank())
+                .orElse(defaultSiteTitle);
+    }
+
+    /** 当前作者名：同样数据库优先、配置兜底 */
+    @Transactional(readOnly = true)
+    public String getSiteAuthor() {
+        return siteSettingRepository.findById(SiteSetting.SINGLETON_ID)
+                .map(SiteSetting::getSiteAuthor)
+                .filter(value -> value != null && !value.isBlank())
+                .orElse(defaultSiteAuthor);
+    }
+
+    /**
+     * 改名：只改"站点怎么显示自己"（首页大标题、导航、浏览器标签、页脚、侧边栏）。
+     *
+     * <p>特意<b>不</b>去更新 article 表的 author：文章作者是写作时的业务数据，
+     * 改站名不应该把历史文章的作者一起改掉。留空就等于恢复默认值。</p>
+     */
+    @Transactional
+    public void updateNames(String siteTitle, String siteAuthor) {
+        SiteSetting setting = getOrCreate();
+        setting.setSiteTitle(normalizeName(siteTitle));
+        setting.setSiteAuthor(normalizeName(siteAuthor));
+        setting.setUpdatedAt(LocalDateTime.now());
+        siteSettingRepository.save(setting);
+        log.info("站点名称已更新：站名={}，作者={}", getSiteTitle(), getSiteAuthor());
+    }
+
+    /** 去掉首尾空格；空字符串当作"没设置"（等于恢复默认）；超长截断兜底 */
+    private static String normalizeName(String raw) {
+        if (raw == null) {
+            return null;
+        }
+        String value = raw.trim();
+        if (value.isEmpty()) {
+            return null;
+        }
+        return value.length() > MAX_NAME_LENGTH ? value.substring(0, MAX_NAME_LENGTH) : value;
     }
 
     /** 取设置行，不存在就创建一行（后台设置页使用） */
