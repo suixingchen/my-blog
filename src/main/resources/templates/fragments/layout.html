@@ -4,7 +4,7 @@
 <head th:fragment="head(title)">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title th:text="${title} + ' · ' + ${blogTitle}">我的个人博客</title>
+    <title th:text="${title} + ' · ' + ${blogTitle}">Stellara的个人博客</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <!-- 动态样式表：内容由 ThemeCssController 生成，里面带着管理员设置的壁纸路径 -->
     <link rel="stylesheet" th:href="@{/theme.css}">
@@ -36,7 +36,7 @@
     <div class="container header-inner">
         <a class="brand" th:href="@{/}">
             <span class="brand-dot"></span>
-            <span th:text="${blogTitle}">我的个人博客</span>
+            <span th:text="${blogTitle}">Stellara的个人博客</span>
         </a>
         <nav class="nav">
             <a th:href="@{/}">首页</a>

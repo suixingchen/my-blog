@@ -42,7 +42,7 @@ spring:
       max-request-size: 45MB
 
 blog:
-  title: 我的个人博客
+  title: Stellara的个人博客
   subtitle: 记录学习与生活的角落
   author: suixingchen
   # 前台与后台列表每页条数
